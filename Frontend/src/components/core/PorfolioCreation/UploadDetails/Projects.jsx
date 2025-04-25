@@ -87,8 +87,8 @@ const ProjectForm = () => {
   };
 
   return (
-    <div className="bg-gradient-to-br from-[#0f0f0f] via-[#111] to-[#1a1a1a] border border-purple-500/30 text-white p-10 rounded-2xl shadow-[0_0_15px_#8B5CF6] max-w-3xl mx-auto">
-      <h2 className="text-3xl md:text-4xl font-extrabold mb-8 text-center text-purple-400 flex justify-center items-center gap-3">
+    <div className="bg-gradient-to-br from-[#0f0f0f] via-[#111] mb-3 to-[#1a1a1a] border border-purple-500/30 text-white p-8 rounded-2xl shadow-[0_0_15px_#8B5CF6] max-w-3xl mx-auto">
+      <h2 className="text-3xl md:text-4xl font-extrabold mb-5 text-center text-purple-400 flex justify-center items-center gap-3">
         <FaProjectDiagram/> Project
       </h2>
 
@@ -129,7 +129,7 @@ const ProjectForm = () => {
             value={project.technologies}
             onChange={handleChange}
             className="w-full p-4 bg-black/30 text-white placeholder-gray-400 border border-purple-500/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500"
-            placeholder="Enter technologies used"
+            placeholder="Eg. React, Tailwind"
           />
           {errors.technologies && <span className="text-xs text-pink-300 ml-1">{errors.technologies}</span>}
         </div>
@@ -166,7 +166,7 @@ const ProjectForm = () => {
           <Upload
           color="purple"
             name="projectBanner"
-            label="Upload Project Banner (SVG, PNG, JPG)"
+            label="Upload Project Banner "
             onFileSelect={handleFileSelect}
             register={() => {}} // noop since you're not using it
             setValue={(name, file) => {

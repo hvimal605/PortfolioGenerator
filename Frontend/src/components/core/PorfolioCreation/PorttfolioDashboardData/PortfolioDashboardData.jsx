@@ -40,7 +40,7 @@ const PortfolioDashboardData = ({selectedPortfolio}) => {
     const fetchPortfolio = async () => {
       try {
         const data = await getFullDetailsOfPortfolio(portfolioId, token);
-        console.log("Fetched Portfolio Data:", data);
+        // console.log("Fetched Portfolio Data:", data);
         setPortfolioData(data);
       } catch (error) {
         console.error("Error fetching portfolio data:", error);
@@ -55,7 +55,7 @@ const PortfolioDashboardData = ({selectedPortfolio}) => {
   }
 
   return (
-    <div className="w-full bg-gray-900/50 backdrop-blur-md text-white p-3 md:p-6 rounded-xl mt-2 border border-gray-600 shadow-[0_0_25px_5px_rgba(255,255,255,0.1)]">
+    <div className="w-full bg-gray-900/50 backdrop-blur-md text-white p-2 md:p-5 mb-2 rounded-xl  border border-gray-600 shadow-[0_0_25px_5px_rgba(255,255,255,0.1)]">
 
 
 
@@ -71,7 +71,7 @@ const PortfolioDashboardData = ({selectedPortfolio}) => {
       <Projects  projects={portfolioData.projects} />
 
       {portfolioData.deployLink === "" && (
-        <div className="mt-8 flex justify-center">
+        <div className="mt-3 flex justify-center">
           <Link to={"/portfolio/deploy"} className="rounded-xl border-cyan-300 border-2">
             <AnimatedButton4 text={"Deploy"} />
           </Link>

@@ -226,7 +226,7 @@ export const PersonalportfolioData = ({ portfolioData }) => {
           value={formData.aboutme || ""}
           onChange={handleChange}
           placeholder="Short bio or description"
-          rows={4}
+          rows={6}
           className="input-style resize-none"
         />
       </div>

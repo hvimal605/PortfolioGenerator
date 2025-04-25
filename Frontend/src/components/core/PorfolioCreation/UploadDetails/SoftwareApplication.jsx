@@ -80,8 +80,8 @@ const SoftwareApplicationForm = () => {
 
 
   return (
-    <div className="bg-gradient-to-br from-[#0f0f0f] via-[#111] to-[#1a1a1a] border border-blue-500/30 text-white p-10 rounded-2xl shadow-[0_0_15px_#3B82F6] max-w-3xl mx-auto ">
-    <h2 className="text-2xl md:text-4xl font-extrabold mb-8 text-center text-blue-400 flex justify-center items-center gap-3">
+    <div className="bg-gradient-to-br from-[#0f0f0f] mb-3 via-[#111] to-[#1a1a1a] border border-blue-500/30 text-white p- rounded-2xl shadow-[0_0_15px_#3B82F6] max-w-3xl mx-auto p-8 mt-1">
+    <h2 className="text-2xl md:text-4xl font-extrabold mb-4 text-center text-blue-400 flex justify-center items-center gap-3">
      <FaLaptopCode/> Software App
     </h2>
   
@@ -105,7 +105,7 @@ const SoftwareApplicationForm = () => {
         <Upload
         color="blue"
           name="applicationSvg"
-          label="Upload Application Image (SVG, PNG, JPG)"
+          label="Upload Application Image ( PNG, JPG)"
           register={register}
           setValue={setValue}
           watch={watch}

@@ -66,9 +66,9 @@ const PersonalDetails = () => {
   };
 
   return (
-    <div className="bg-gradient-to-br from-[#0f0f0f] via-[#111] to-[#1a1a1a] border border-yellow-400/30 text-white p-10 rounded-2xl shadow-[0_0_15px_#FFD700] max-w-3xl mx-auto">
+    <div className="bg-gradient-to-br from-[#0f0f0f] via-[#111] to-[#1a1a1a] border border-yellow-400/30 text-white p-10 rounded-2xl shadow-[0_0_15px_#FFD700] max-w-3xl mx-auto mb-2">
 
-      <h2 className="text-3xl md:text-4xl font-extrabold mb-8 text-center text-yellow-400 flex justify-center items-center gap-2 ">
+      <h2 className="text-3xl md:text-4xl font-extrabold mb-5 text-center text-yellow-400 flex justify-center items-center gap-2 ">
       <FaUserAlt/>  Personal Details
       </h2>
 
@@ -119,7 +119,7 @@ const PersonalDetails = () => {
   <textarea
     {...register("aboutme", { required: true })}
     placeholder="Write something about yourself..."
-    rows={5}
+    rows={6}
     className="w-full p-4 bg-black/30 text-white placeholder-gray-400 border border-yellow-500/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-500"
   />
 </div>
@@ -129,7 +129,7 @@ const PersonalDetails = () => {
   <label className="block mb-2 text-yellow-300">Roles</label>
   <input
     {...register("roles", { required: true })}
-    placeholder="Roles (e.g., Developer, Designer)"
+    placeholder="Roles (e.g.,Coder, Developer, Designer)"
     className="w-full p-4 bg-black/30 text-white placeholder-gray-400 border border-yellow-500/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-500"
   />
 </div>

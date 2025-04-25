@@ -1,6 +1,5 @@
 import { motion } from "framer-motion";
 import AnimatedButton2 from "../../common/AnimatedButton2";
-import { FaRegEdit } from "react-icons/fa";
 import { FaArrowCircleRight } from "react-icons/fa";
 
 export default function TemplateCardFortemplates({ template, onSelect }) {
@@ -11,20 +10,20 @@ export default function TemplateCardFortemplates({ template, onSelect }) {
   return (
     <motion.div
       whileHover={{ scale: 1.03 }}
-      className="relative group cursor-pointer bg-black backdrop-blur-xl rounded-2xl overflow-hidden shadow-md hover:shadow-white transition duration-300 border border-white border-dashed "
+      className="relative group cursor-pointer bg-black backdrop-blur-xl rounded-2xl overflow-hidden shadow-md hover:shadow-white transition duration-300 border border-white border-dashed"
     >
       {/* Template Preview Image with Overlay */}
-      <div className="relative w-full h-56 overflow-hidden p-4">
+      <div className="relative w-full h-64 overflow-hidden p-4  flex items-center justify-center">
         <img
           src={template.previewImage}
           alt={template.name}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          className="max-h-full max-w-full object-contain transition-transform duration-500 group-hover:scale-105"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent"></div>
+        <div className="absolute inset-0 bg-gradient-to-t  to-transparent pointer-events-none"></div>
       </div>
 
       {/* Template Info */}
-      <div className="p-5 text-white ml-5">
+      <div className="p-5 text-white">
         <h2 className="text-xl font-bold tracking-wide text-blue-400 group-hover:text-green-400 transition duration-300">
           {template.name}
         </h2>

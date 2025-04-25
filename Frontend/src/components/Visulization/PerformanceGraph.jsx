@@ -23,7 +23,7 @@ ChartJS.register(
 );
 
 const PerformanceGraph = ({ data }) => {
-  const currentMonth = new Date().getMonth(); // 0-indexed: Jan = 0, Apr = 3
+  const currentMonth = new Date().getMonth(); // 0-indexed
   const filteredData = data.slice(0, currentMonth + 1);
 
   const labels = filteredData.map((item) => item.month);
@@ -68,7 +68,13 @@ const PerformanceGraph = ({ data }) => {
             y: {
               beginAtZero: true,
               grid: { color: "rgba(255, 255, 255, 0.1)" },
-              ticks: { color: "#e2e8f0" },
+              ticks: {
+                color: "#e2e8f0",
+                stepSize: 1,
+                callback: function (value) {
+                  return Number.isInteger(value) ? value : null;
+                },
+              },
             },
             x: {
               grid: { color: "rgba(255, 255, 255, 0.1)" },

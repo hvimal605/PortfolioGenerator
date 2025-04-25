@@ -40,21 +40,21 @@ const AddMoreInPortfolio = () => {
     useEffect(() => {
         if (portfolios.length > 0) {
             const firstPortfolio = portfolios[0];
-            setSelectedPortfolio(firstPortfolio); // Set the first portfolio by default
-            dispatch(setPortfolio(firstPortfolio)); // Dispatch the first portfolio by default
+            setSelectedPortfolio(firstPortfolio); 
+            dispatch(setPortfolio(firstPortfolio)); 
         }
     }, [portfolios, dispatch]);
 
     // Handle portfolio change
     const handlePortfolioChange = (e) => {
         const selectedId = e.target.value;
-        const selected = portfolios.find((p) => p._id === selectedId);  // Match by _id
+        const selected = portfolios.find((p) => p._id === selectedId);  
         setSelectedPortfolio(selected);
         dispatch(setPortfolio(selected));
     };
 
     return (
-        <div className="min-h-screen text-white p-6 md:p-8 space-y-6">
+        <div className=" text-white p-6 md:p-8 space-y-6">
             <h1 className="text-3xl md:text-4xl font-extrabold text-center pb-4 uppercase tracking-wide bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-pink-500">
                 Add Details in Portfolios
             </h1>

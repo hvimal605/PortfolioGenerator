@@ -14,7 +14,6 @@ import { Bar } from "react-chartjs-2";
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 const TemplateUsageComparison = ({ usageStats }) => {
-  // Extract labels and usage data
   const labels = usageStats.map((template) => template.name);
   const dataValues = usageStats.map((template) => template.usageCount);
 
@@ -29,7 +28,6 @@ const TemplateUsageComparison = ({ usageStats }) => {
         borderWidth: 2,
         hoverBackgroundColor: "#fb7185",
         hoverBorderColor: "#f43f5e",
-        
       },
     ],
   };
@@ -50,7 +48,13 @@ const TemplateUsageComparison = ({ usageStats }) => {
       y: {
         beginAtZero: true,
         grid: { color: "rgba(255, 255, 255, 0.1)" },
-        ticks: { color: "#e2e8f0" },
+        ticks: {
+          color: "#e2e8f0",
+          stepSize: 1,
+          callback: function (value) {
+            return Number.isInteger(value) ? value : null;
+          },
+        },
       },
       x: {
         grid: { color: "rgba(255, 255, 255, 0.1)" },
@@ -60,7 +64,7 @@ const TemplateUsageComparison = ({ usageStats }) => {
   };
 
   return (
-    <div className="bg-[#1a1a1a] p-6 rounded-2xl border border-[#f472b6] shadow-2xl  hover:shadow-[#f472b6]/50 transition-all duration-300">
+    <div className="bg-[#1a1a1a] p-6 rounded-2xl border border-[#f472b6] shadow-2xl hover:shadow-[#f472b6]/50 transition-all duration-300">
       <h2 className="text-2xl font-semibold text-[#e2e8f0] mb-4">
         Template Usage Comparison
       </h2>

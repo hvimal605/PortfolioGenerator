@@ -39,7 +39,7 @@ export default function MyPortfolios() {
     const fetchPortfolios = async () => {
       try {
         const res = await getPortfoliosForUser(token);
-        console.log("ye hai ji response apka ok ", res);
+        // console.log("ye hai ji response apka ok ", res);
 
         if (res?.success) {
           setStats({
@@ -75,22 +75,22 @@ export default function MyPortfolios() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black to-gray-900 text-white p-6 sm:p-8 space-y-8">
+    <div className=" mb-1 bg-gradient-to-br from-black to-gray-900 text-white p-6 sm:p-8 space-y-8">
 
       <h1 className="text-4xl sm:text-5xl font-extrabold text-center text-transparent bg-clip-text bg-gradient-to-r  pb-4 border-b-4 border-gradient-to-r from-cyan-500 via-blue-600 to-purple-700 uppercase tracking-widest drop-shadow-2xl animate-fade-in">
         My Portfolios
       </h1>
       {/* Create Portfolio Button */}
-<div className="flex justify-center">
-  <Link to="/portfolioCreate">
-    <button className="bg-black border border-white/10 text-white px-6 py-3 rounded-2xl font-semibold text-lg tracking-wide shadow-[0_0_20px_rgba(0,255,255,0.2)] hover:shadow-[0_0_25px_rgba(0,255,255,0.4)] hover:bg-gradient-to-r hover:from-cyan-700 hover:to-blue-800 transition-all duration-400 ease-in-out backdrop-blur-sm">
-      <span className="flex items-center gap-2">
-        <span className="text-xl"><FaPlusCircle /></span>
-        Create New Portfolio
-      </span>
-    </button>
-  </Link>
-</div>
+      <div className="flex justify-center">
+        <Link to="/portfolioCreate">
+          <button className="bg-black border border-white/10 text-white px-6 py-3 rounded-2xl font-semibold text-lg tracking-wide shadow-[0_0_20px_rgba(0,255,255,0.2)] hover:shadow-[0_0_25px_rgba(0,255,255,0.4)] hover:bg-gradient-to-r hover:from-cyan-700 hover:to-blue-800 transition-all duration-400 ease-in-out backdrop-blur-sm">
+            <span className="flex items-center gap-2">
+              <span className="text-xl"><FaPlusCircle /></span>
+              Create New Portfolio
+            </span>
+          </button>
+        </Link>
+      </div>
 
 
       {/* Portfolio Stats */}
@@ -138,14 +138,15 @@ export default function MyPortfolios() {
                       src={portfolio.previewLink}
                       title={portfolio.name}
                       className="w-[1400px] h-[900px] rounded-lg border-none"
-                      sandbox="allow-scripts allow-same-origin"
+                      sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
+
                       style={{
                         transform: "scale(0.5)",
                         transformOrigin: "top left",
                         width: "200%",
                         height: "200%",
-                        
-                        scrollbarColor:"black",
+
+                        scrollbarColor: "black",
                         overflow: "hidden",
                         borderRadius: "8px",
                       }}
@@ -160,24 +161,23 @@ export default function MyPortfolios() {
 
                 {/* Status Tag */}
                 <span
-  className={`absolute top-2 right-2 text-xs font-bold px-3 py-1 rounded-full text-white shadow-md tracking-wide ${
-    portfolio.status === 'completed'
-      ? 'bg-emerald-500/90'
-      : 'bg-yellow-400/90 text-black'
-  }`}
->
-  {portfolio.status === 'completed' ? (
-    <span className="flex items-center gap-1">
-      <MdOutlineDone className="text-white text-md" />
-      Completed
-    </span>
-  ) : (
-    <span className="flex items-center gap-1">
-      <CgSandClock className="text-white text-xl" />
-      Pending
-    </span>
-  )}
-</span>
+                  className={`absolute top-2 right-2 text-xs font-bold px-3 py-1 rounded-full text-white shadow-md tracking-wide ${portfolio.status === 'completed'
+                      ? 'bg-emerald-500/90'
+                      : 'bg-yellow-400/90 text-black'
+                    }`}
+                >
+                  {portfolio.status === 'completed' ? (
+                    <span className="flex items-center gap-1">
+                      <MdOutlineDone className="text-white text-md" />
+                      Completed
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-1">
+                      <CgSandClock className="text-white text-xl" />
+                      Pending
+                    </span>
+                  )}
+                </span>
 
               </div>
 

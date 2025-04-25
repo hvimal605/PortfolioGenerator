@@ -62,9 +62,9 @@ const Timeline = () => {
 
 
   return (
-    <div className="bg-gradient-to-br from-[#0f0f0f] via-[#111] to-[#1a1a1a] border border-pink-400/30 text-white p-10 rounded-2xl shadow-[0_0_15px_#ec4899] max-w-3xl mx-auto">
+    <div className="bg-gradient-to-br from-[#0f0f0f] via-[#111] to-[#1a1a1a] border mb-3 border-pink-400/30 text-white p-8 rounded-2xl shadow-[0_0_15px_#ec4899] max-w-3xl mx-auto">
 
-    <h2 className="text-3xl md:text-4xl font-extrabold mb-8 text-center text-pink-400 flex justify-center items-center gap-3">
+    <h2 className="text-3xl md:text-4xl font-extrabold mb-4 text-center text-pink-400 flex justify-center items-center gap-3">
     <FaRegClock  /> Timeline
     </h2>
 

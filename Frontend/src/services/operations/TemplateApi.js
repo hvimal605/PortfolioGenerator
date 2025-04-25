@@ -141,7 +141,7 @@ export const getDeveloperTemplates = async (token) => {
       throw new Error("Failed to fetch requested templates.");
     }
 
-    toast.success("Templates fetched!");
+    // toast.success("Templates fetched!");
     return response.data.templates;
   } catch (error) {
     console.error("GET_DEVELOPER_TEMPLATES_API ERROR:", error);

@@ -79,8 +79,8 @@ const SkillForm = () => {
   };
 
   return (
-    <div className="bg-gradient-to-br from-[#0f0f0f] via-[#111] to-[#1a1a1a] border border-green-500/30 text-white p-10 rounded-2xl shadow-[0_0_15px_#10B981] max-w-3xl mx-auto ">
-  <h2 className="text-3xl md:text-4xl font-extrabold mb-8 text-center text-green-400 flex justify-center items-center gap-3">
+    <div className="bg-gradient-to-br from-[#0f0f0f] mb-3 via-[#111] to-[#1a1a1a] border border-green-500/30 text-white p-8 rounded-2xl shadow-[0_0_15px_#10B981] max-w-3xl mx-auto ">
+  <h2 className="text-3xl md:text-4xl font-extrabold mb-5 text-center text-green-400 flex justify-center items-center gap-3">
    <HiOutlineLightningBolt />  Skill
   </h2>
 
@@ -120,7 +120,7 @@ const SkillForm = () => {
       <Upload
       color="green"
         name="skillSvg"
-        label="Upload Skill Icon (SVG, PNG, JPG)"
+        label="Upload Skill Icon (PNG, JPG )"
         register={register}
         setValue={setValue}
         watch={watch}

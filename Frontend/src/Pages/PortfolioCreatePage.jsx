@@ -94,9 +94,10 @@ const PortfolioCreatePage = () => {
           >
             {/* Select Template Title */}
 
-            <h2 className="text-2xl md:text-4xl font-bold ">
-              Select Template
-            </h2>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold text-center text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 via-purple-500 to-pink-500 transition-all duration-300">
+  Click on a Template to Select It
+</h2>
+
             {/* Template Selection Section */}
             <div className=" w-full h-[78vh] overflow-y-auto  p-2 rounded-lg">
               <TemplateSelection onTemplateSelect={handleTemplateSelect} />
@@ -105,7 +106,7 @@ const PortfolioCreatePage = () => {
             {selectedTemplate && (
               <motion.button
                 type="button"
-                className="mt-3"
+                className="mt-1"
                 whileTap={{ scale: 0.95 }}
                 onClick={handleUploadDetails}
               >

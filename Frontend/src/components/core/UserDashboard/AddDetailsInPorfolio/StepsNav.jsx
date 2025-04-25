@@ -9,11 +9,10 @@ const StepsNav = ({ steps, currentStep }) => {
 
   return (
     <>
-      {/* Navbar for Desktop & Tablets */}
-      {/* Navbar for Desktop & Tablets */}
-<div className="hidden sm:flex fixed top-72 left-1/2 transform -translate-x-1/2 justify-center items-center bg-gradient-to-br from-[#1a1a1a] via-[#111] to-[#0f0f0f] backdrop-blur-lg p-5 rounded-xl shadow-xl mb-6 border border-gray-600 w-[95%] max-w-6xl overflow-x-auto z-40">
+ 
+<div className="hidden sm:flex fixed top-72 left-1/2 transform -translate-x-1/2 justify-center items-center bg-gradient-to-br from-[#1a1a1a] via-[#111] to-[#0f0f0f] backdrop-blur-lg p-5 rounded-xl shadow-xl  border border-gray-600 w-[95%]  max-w-6xl overflow-x-auto z-40">
   {steps.map((step, index) => (
-    <div key={index} className="flex items-center">
+    <div key={index} className="flex items-center ">
       <button
         onClick={() => dispatch(setStep(index))}
         className={`relative px-6 py-3 text-sm sm:text-md font-semibold rounded-full transition-all duration-300 ease-in-out transform 
@@ -34,9 +33,7 @@ const StepsNav = ({ steps, currentStep }) => {
 
 
 
-      {/* Mobile Navbar with Hamburger Menu */}
-   {/* Mobile Navbar – Steps in One Line, No Sidebar */}
-<div className="sm:hidden fixed top-72 left-1/2 transform -translate-x-1/2 bg-gradient-to-br from-[#1a1a1a] via-[#111] to-[#0f0f0f] backdrop-blur-lg p-2 rounded-xl shadow-lg border border-gray-600 w-[95%] overflow-x-auto flex space-x-2 items-center justify-start z-50 no-scrollbar">
+<div className="sm:hidden fixed top-72 left-1/2 transform -translate-x-1/2 bg-gradient-to-br from-[#1a1a1a] via-[#111] to-[#0f0f0f] backdrop-blur-lg p-1 rounded-xl shadow-lg border border-gray-600 w-[95%] overflow-x-auto flex space-x-2 items-center justify-start z-50 no-scrollbar">
   {steps.map((step, index) => (
     <button
       key={index}

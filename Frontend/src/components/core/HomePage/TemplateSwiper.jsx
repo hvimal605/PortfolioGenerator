@@ -25,7 +25,7 @@ const TemplateSwiper = () => {
   useEffect(() => {
     const fetchTemplates = async () => {
       const result = await getAllTemplates();
-      console.log("Fetched templates:", result);
+      // console.log("Fetched templates:", result);
       if (result) {
         setTemplates(result);
       }
@@ -119,7 +119,8 @@ const TemplateSwiper = () => {
               <img
                 src={selectedTemplate.previewImage}
                 alt={selectedTemplate.name}
-                className="mt-4 rounded-lg border border-white/10 shadow-lg w-full h-64 object-cover"
+                className="mt-4 rounded-lg border border-white/10 shadow-lg w-full max-h-80 object-contain bg-black"
+
               />
 
               <div onClick={handleStartBuilding} className="mt-6 flex justify-center">

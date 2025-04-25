@@ -23,7 +23,7 @@ const MessageList = ({ response, onDelete }) => {
 
       <div className="grid gap-10 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
         {response.data.length === 0 ? (
-          <p className="text-gray-300 col-span-full text-center text-xl animate__animated animate__fadeInUp flex justify-center items-center gap-2">
+          <p className="text-gray-300 col-span-full text-center md:text-xl  text-sm animate__animated animate__fadeInUp flex justify-center items-center gap-2">
             <SiGooglemessages /> No messages yet... but they're coming!
           </p>
         ) : (

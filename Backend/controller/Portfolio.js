@@ -294,7 +294,7 @@ exports.updatePortfolioDetails = async (req, res) => {
       LastName,
       phone,
       email,
-    
+
       linkedIn,
       github,
       twitter,
@@ -303,7 +303,7 @@ exports.updatePortfolioDetails = async (req, res) => {
       roles, // either array or comma-separated string
     } = req.body;
 
-    
+
 
     if (!portfolioId) {
       return res.status(400).json({
@@ -359,7 +359,7 @@ exports.updatePortfolioDetails = async (req, res) => {
     portfolio.contactDetails = {
       phone: phone || portfolio.contactDetails.phone,
       email: email || portfolio.contactDetails.email,
-    
+
     };
 
     portfolio.socialLinks = {
@@ -549,9 +549,16 @@ exports.getPortfoliosForUser = async (req, res) => {
 
 
 exports.trackVisitofPortfolio = async (req, res) => {
-  const { slug, visitorId } = req.body;
+
+
+
+
 
   try {
+    const { slug, visitorId } = req.body;
+    if (!visitorId) {
+      return res.status(400).json({ message: "visitorId is required" });
+    }
     const portfolio = await Portfolio.findOne({ slug });
     if (!portfolio) return res.status(404).json({ message: "Portfolio not found" });
 

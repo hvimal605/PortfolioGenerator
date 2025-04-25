@@ -47,7 +47,7 @@ export const createTimeline = async (timelineData, token) => {
       "Content-Type": "multipart/form-data",
       Authorization: `Bearer ${token}`,
     })
-    console.log("Timeline API Response:", response);
+    // console.log("Timeline API Response:", response);
 
     // Correctly handling the response structure
     if (!response?.data?.success) {
@@ -73,7 +73,7 @@ export const deleteTimeline = async ({ Timelineid, portfolioId, token }) => {
       Authorization: `Bearer ${token}`,
     });
 
-    console.log("Delete Timeline Response:", response);
+    // console.log("Delete Timeline Response:", response);
 
     if (!response?.data?.success) {
       throw new Error(response?.data?.message || "Could not delete timeline.");
@@ -104,7 +104,7 @@ export const addSkill = async (skillData, token) => {
       Authorization: `Bearer ${token}`,
     });
 
-    console.log("Add Skill API Response:", response);
+    // console.log("Add Skill API Response:", response);
 
     if (!response?.data?.success) {
       throw new Error(response?.data?.message || "Could not add skill.");
@@ -133,7 +133,7 @@ export const deleteSkill = async ({ skillId, portfolioId, token }) => {
       }
     );
 
-    console.log("Delete Skill Response:", response);
+    // console.log("Delete Skill Response:", response);
 
     if (!response?.data?.success) {
       throw new Error(response?.data?.message || "Could not delete skill.");
@@ -163,7 +163,7 @@ export const updateSkill = async (formData, token) => {
       Authorization: `Bearer ${token}`,
     });
 
-    console.log("UPDATE_SKILL API RESPONSE:", response);
+    // console.log("UPDATE_SKILL API RESPONSE:", response);
 
     if (!response?.data?.success) {
       throw new Error("Failed to update skill");
@@ -195,7 +195,7 @@ export const addSoftwareApplication = async (softwareData, token) => {
       Authorization: `Bearer ${token}`,
     });
 
-    console.log("Add Software app API Response:", response);
+    // console.log("Add Software app API Response:", response);
 
     if (!response?.data?.success) {
       throw new Error(response?.data?.message || "Could not add Software app.");
@@ -223,7 +223,7 @@ export const deleteSoftwareApp = async ({ softwareId, portfolioId, token }) => {
       }
     );
 
-    console.log("Delete Software Application Response:", response);
+    // console.log("Delete Software Application Response:", response);
 
     if (!response?.data?.success) {
       throw new Error(response?.data?.message || "Could not delete software application.");
@@ -253,7 +253,7 @@ export const updateSoftwareApp = async (formData, token) => {
       Authorization: `Bearer ${token}`,
     });
 
-    console.log("UPDATE_SOFTWARE_APP API RESPONSE:", response);
+    // console.log("UPDATE_SOFTWARE_APP API RESPONSE:", response);
 
     if (!response?.data?.success) {
       throw new Error("Failed to update software application");
@@ -280,7 +280,7 @@ export const addProject = async (projectData, token) => {
       Authorization: `Bearer ${token}`,
     });
 
-    console.log("Add PROJECT API Response:", response);
+    // console.log("Add PROJECT API Response:", response);
 
     if (!response?.data?.success) {
       throw new Error(response?.data?.message || "Could not add Project.");
@@ -310,7 +310,7 @@ export const deleteProject = async ({ projectId, portfolioId, token }) => {
       }
     );
 
-    console.log("Delete Project Response:", response);
+    // console.log("Delete Project Response:", response);
 
     if (!response?.data?.success) {
       throw new Error(response?.data?.message || "Could not delete project.");
@@ -340,7 +340,7 @@ export const updateProject = async (formData, token) => {
       Authorization: `Bearer ${token}`,
     });
 
-    console.log("UPDATE_PROJECT API RESPONSE: ", response);
+    // console.log("UPDATE_PROJECT API RESPONSE: ", response);
 
     if (!response?.data?.success) {
       throw new Error("Failed to update project");
@@ -372,6 +372,7 @@ export const addPersonalDetails = async (personalData, token) => {
 
     console.log("Add PERSONAL DETAILS API Response:", response);
 
+
     if (!response?.data?.success) {
       throw new Error(response?.data?.message || "Could not add Personal details.");
     }
@@ -399,7 +400,7 @@ export const updatePortfolioDetails = async (formData, token) => {
       Authorization: `Bearer ${token}`,
     });
 
-    console.log("UPDATE_PORTFOLIO_DETAILS RESPONSE:", response);
+    // console.log("UPDATE_PORTFOLIO_DETAILS RESPONSE:", response);
 
     if (!response?.data?.success) {
       throw new Error("Failed to update portfolio");
@@ -434,7 +435,7 @@ export const getFullDetailsOfPortfolio = async (portfolioId, token) => {
         Authorization: `Bearer ${token}`,
       }
     )
-    console.log("PORTFOLIO_FULL_DETAILS_API API RESPONSE............", response)
+    // console.log("PORTFOLIO_FULL_DETAILS_API API RESPONSE............", response)
 
     if (!response.data.success) {
       throw new Error(response.data.message)
@@ -488,7 +489,7 @@ export const getPortfoliosForUser = async (token) => {
         Authorization: `Bearer ${token}`,
       }
     )
-    console.log("PORTFOLIOS_FOR_USER_API RESPONSE............", response.data)
+    // console.log("PORTFOLIOS_FOR_USER_API RESPONSE............", response.data)
 
     if (!response.data.success) {
       throw new Error(response.data.message)
@@ -503,7 +504,7 @@ export const getPortfoliosForUser = async (token) => {
 }
 
 export const getPortfolioVisitorStats = async (portfolioId, token) => {
-  const toastId = toast.loading("Loading...");
+  // const toastId = toast.loading("Loading...");
 
   let result = null;
   try {
@@ -517,7 +518,7 @@ export const getPortfolioVisitorStats = async (portfolioId, token) => {
       }
     );
 
-    console.log("GET_Portfolio_VisitorStats_API RESPONSE............", response.data);
+    // console.log("GET_Portfolio_VisitorStats_API RESPONSE............", response.data);
 
     if (!response.data.success) {
       throw new Error(response.data.message);
@@ -529,13 +530,13 @@ export const getPortfolioVisitorStats = async (portfolioId, token) => {
     result = error?.response?.data || { success: false, message: "Something went wrong!" };
   }
 
-  toast.dismiss(toastId);
+  // toast.dismiss(toastId);
   return result;
 };
 
 
 export const getAllMessages = async (portfolioId, token) => {
-  const toastId = toast.loading("Loading...");
+  // const toastId = toast.loading("Loading...");
 
   let result = null;
   try {
@@ -549,7 +550,7 @@ export const getAllMessages = async (portfolioId, token) => {
       }
     );
 
-    console.log(" GET_ALL_MESSAGES_API RESPONSE............", response.data);
+    // console.log(" GET_ALL_MESSAGES_API RESPONSE............", response.data);
 
     if (!response.data.success) {
       throw new Error(response.data.message);
@@ -561,7 +562,7 @@ export const getAllMessages = async (portfolioId, token) => {
     result = error?.response?.data || { success: false, message: "Something went wrong!" };
   }
 
-  toast.dismiss(toastId);
+  // toast.dismiss(toastId);
   return result;
 };
 

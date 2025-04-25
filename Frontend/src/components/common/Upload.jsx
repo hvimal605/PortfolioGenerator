@@ -37,7 +37,7 @@ export default function Upload({
 
   const { getRootProps, getInputProps, open, isDragActive } = useDropzone({
     accept: {
-      "image/*": [".svg", ".png", ".jpeg", ".jpg"],
+      "image/*": [ ".png", ".jpeg", ".jpg"],
       "application/pdf": [".pdf"],
     },
     onDrop,
@@ -187,7 +187,7 @@ export default function Upload({
                 </button>
               </p>
               <ul className={`mt-6 space-y-1 text-xs text-center ${theme.subText}`}>
-                <li>Supported: SVG, PNG, JPG, PDF</li>
+                <li>Supported: PNG, JPG, PDF</li>
                 <li>Recommended size: 1024x576 for images</li>
               </ul>
             </motion.div>

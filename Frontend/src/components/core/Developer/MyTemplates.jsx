@@ -40,7 +40,7 @@ const MyTemplates = () => {
   }, [selectedStatus, templates]);
 
   return (
-    <div className="min-h-screen  text-white p-10 flex flex-col items-center">
+    <div className=" text-white p-6 flex flex-col items-center">
       <h2
   className="text-3xl font-bold mb-6 bg-gradient-to-r from-indigo-400 to-purple-500 bg-clip-text text-transparent"
 >
@@ -73,7 +73,7 @@ const MyTemplates = () => {
       {loading ? (
         <p className="text-gray-300 text-lg animate-pulse">Loading your templates...</p>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-4 p-4 w-full">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-4 p-2 w-full">
           {filteredTemplates.length > 0 ? (
             filteredTemplates.map(template => (
               <TemplateCardDeveloper key={template._id} template={template} />

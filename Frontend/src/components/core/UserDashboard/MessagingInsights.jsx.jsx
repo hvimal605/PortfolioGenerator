@@ -134,7 +134,7 @@ export default function MessagingInsights() {
 
 
   return (
-    <div className="min-h-screen text-white p-6 md:p-8 space-y-6">
+    <div className=" text-white p-6 md:p-8 space-y-6 mb-2">
       <h1 className="text-3xl md:text-4xl font-extrabold text-center pb-4 uppercase tracking-wide bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-pink-500">
         Messaging & Visitor Insights
       </h1>
@@ -176,7 +176,7 @@ export default function MessagingInsights() {
       <div className="border rounded-xl">
 
 
-      <div className="flex items-center justify-end mt-2 mr-5">
+      <div className="flex items-center justify-end mt-1 mr-5">
   <div className="flex flex-wrap items-center gap-4 bg-gradient-to-br from-white/10 via-white/5 to-transparent p-3 sm:p-4 px-5 rounded-2xl border border-white/10 shadow-[0_0_20px_2px_rgba(255,255,255,0.05)] backdrop-blur-md transition-all duration-300 m-2">
     
     <span className="text-sm sm:text-base font-semibold tracking-wide text-white/80 flex justify-center items-center gap-2 ">
