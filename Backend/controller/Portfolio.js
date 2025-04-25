@@ -425,7 +425,7 @@ exports.getPortfolioDetailsById = async (req, res) => {
 
 exports.getPortfolioBySlug = async (req, res) => {
   try {
-    const { slug } = req.body; // Get slug from URL params
+    const { slug } = req.body; 
 
     if (!slug) {
       return res.status(400).json({
@@ -436,12 +436,12 @@ exports.getPortfolioBySlug = async (req, res) => {
 
     // Find portfolio by slug
     const portfolio = await Portfolio.findOne({ slug })
-      .populate("userId", "email") // Populate user details if needed
-      .populate("templateId") // Populate template details
-      .populate("skills") // Populate skills if necessary
-      .populate("projects") // Populate projects
-      .populate("softwareApplications") // Populate software apps
-      .populate("timeline"); // Populate timeline
+      .populate("userId", "email") 
+      .populate("templateId")
+      .populate("skills") 
+      .populate("projects") 
+      .populate("softwareApplications") 
+      .populate("timeline"); 
 
     if (!portfolio) {
       return res.status(404).json({

@@ -74,7 +74,14 @@ exports.deployPortfolio = async (req, res) => {
         );
 
         const siteId = createSiteResponse.data.id;
-        const netlifySiteUrl = createSiteResponse.data.url;
+        // const netlifySiteUrl = createSiteResponse.data.url;
+        let netlifySiteUrl = createSiteResponse.data.url;
+
+        // Force HTTPS if the URL is HTTP
+        if (netlifySiteUrl && netlifySiteUrl.startsWith('http://')) {
+            netlifySiteUrl = netlifySiteUrl.replace('http://', 'https://');
+        }
+
 
         // Download the ZIP file from Cloudinary
         const zipFileName = `${Date.now()}-${uuidv4()}.zip`;
@@ -120,9 +127,9 @@ exports.deployPortfolio = async (req, res) => {
                     )
                     await Template.findByIdAndUpdate(
                         templateId,
-                        { $addToSet: { usage: userId } } 
-                      )
-                      
+                        { $addToSet: { usage: userId } }
+                    )
+
 
                     return res.status(200).json({
                         success: true,

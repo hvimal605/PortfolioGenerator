@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import AnimatedButton2 from "../../common/AnimatedButton2";
 import { FaArrowCircleRight } from "react-icons/fa";
+import { Link } from "react-router-dom";
 
 export default function TemplateCardFortemplates({ template, onSelect }) {
   const truncatedDescription = template.description.split(" ").length > 12
@@ -13,13 +14,13 @@ export default function TemplateCardFortemplates({ template, onSelect }) {
       className="relative group cursor-pointer bg-black backdrop-blur-xl rounded-2xl overflow-hidden shadow-md hover:shadow-white transition duration-300 border border-white border-dashed"
     >
       {/* Template Preview Image with Overlay */}
-      <div className="relative w-full h-64 overflow-hidden p-4  flex items-center justify-center">
+      <div className="relative w-full h-64 overflow-hidden p-4 flex items-center justify-center">
         <img
           src={template.previewImage}
           alt={template.name}
           className="max-h-full max-w-full object-contain transition-transform duration-500 group-hover:scale-105"
         />
-        <div className="absolute inset-0 bg-gradient-to-t  to-transparent pointer-events-none"></div>
+        <div className="absolute inset-0 bg-gradient-to-t to-transparent pointer-events-none"></div>
       </div>
 
       {/* Template Info */}
@@ -38,15 +39,19 @@ export default function TemplateCardFortemplates({ template, onSelect }) {
         </p>
 
         {/* Buttons */}
-        <div className="mt-5 flex flex-col lg:flex-row items-center justify-center gap-4">
-          <a
-            href={template.previewUrl}
+    
+
+
+
+
+        <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-4">
+          <Link
+            to={template.previewUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="w-full lg:w-auto"
           >
-            <AnimatedButton2 text="Preview Template" />
-          </a>
+            <AnimatedButton2 text=" Preview Template" />
+          </Link>
           <button
             onClick={() => onSelect(template)}
             className="flex items-center gap-2 px-5 py-2 bg-gray-900 text-white font-semibold rounded-lg shadow-md hover:bg-pink-700 transition duration-300"
@@ -54,6 +59,7 @@ export default function TemplateCardFortemplates({ template, onSelect }) {
             <FaArrowCircleRight className="text-xl" />
             Create
           </button>
+          
         </div>
       </div>
     </motion.div>

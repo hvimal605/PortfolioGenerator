@@ -73,7 +73,10 @@ export default function MyPortfolios() {
     dispatch(setPortfolio(portfolio));
     // console.log("Saved to Redux:", portfolio);
   };
-
+    
+  const handleCreateNew = () =>{
+    dispatch(setPortfolio(null));
+  }
   return (
     <div className=" mb-1 bg-gradient-to-br from-black to-gray-900 text-white p-6 sm:p-8 space-y-8">
 
@@ -83,7 +86,7 @@ export default function MyPortfolios() {
       {/* Create Portfolio Button */}
       <div className="flex justify-center">
         <Link to="/portfolioCreate">
-          <button className="bg-black border border-white/10 text-white px-6 py-3 rounded-2xl font-semibold text-lg tracking-wide shadow-[0_0_20px_rgba(0,255,255,0.2)] hover:shadow-[0_0_25px_rgba(0,255,255,0.4)] hover:bg-gradient-to-r hover:from-cyan-700 hover:to-blue-800 transition-all duration-400 ease-in-out backdrop-blur-sm">
+          <button onClick={handleCreateNew} className="bg-black border border-white/10 text-white px-6 py-3 rounded-2xl font-semibold text-lg tracking-wide shadow-[0_0_20px_rgba(0,255,255,0.2)] hover:shadow-[0_0_25px_rgba(0,255,255,0.4)] hover:bg-gradient-to-r hover:from-cyan-700 hover:to-blue-800 transition-all duration-400 ease-in-out backdrop-blur-sm">
             <span className="flex items-center gap-2">
               <span className="text-xl"><FaPlusCircle /></span>
               Create New Portfolio
@@ -162,8 +165,8 @@ export default function MyPortfolios() {
                 {/* Status Tag */}
                 <span
                   className={`absolute top-2 right-2 text-xs font-bold px-3 py-1 rounded-full text-white shadow-md tracking-wide ${portfolio.status === 'completed'
-                      ? 'bg-emerald-500/90'
-                      : 'bg-yellow-400/90 text-black'
+                    ? 'bg-emerald-500/90'
+                    : 'bg-yellow-400/90 text-black'
                     }`}
                 >
                   {portfolio.status === 'completed' ? (
