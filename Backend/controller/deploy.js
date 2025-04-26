@@ -22,6 +22,8 @@ const checkNetlifySiteAvailability = async (slug) => {
 };
 
 
+
+
 // exports.deployPortfolio = async (req, res) => {
 //     try {
 //         const { templateId, PortfolioId } = req.body;
@@ -47,20 +49,18 @@ const checkNetlifySiteAvailability = async (slug) => {
 
 //         let { slug } = portfolio;
 
-//         // Step 1: First check if the original slug is available
+//         // Step 1: Check if original slug is available
 //         if (!(await checkNetlifySiteAvailability(slug))) {
-//             // Step 2: Clean old slug and generate a new unique slug with 4-character suffix
 //             const baseSlug = slug.replace(/-\w{4}$/, "").replace(/-+$/, ""); // Clean suffix & trailing dashes
 //             let uniqueSlug = `${baseSlug}-${nanoid(4)}`;
 
-//             // Step 3: Ensure uniqueness of new slug
 //             while (!(await checkNetlifySiteAvailability(uniqueSlug))) {
 //                 uniqueSlug = `${baseSlug}-${nanoid(4)}`;
 //             }
 //             slug = uniqueSlug;
 //         }
 
-//         // Create a new Netlify site with the available slug
+//         // Step 2: Create a new Netlify site with the available slug
 //         const createSiteResponse = await axios.post(
 //             "https://api.netlify.com/api/v1/sites",
 //             { name: slug },
@@ -71,8 +71,6 @@ const checkNetlifySiteAvailability = async (slug) => {
 //             }
 //         );
 
-//         console.log("ye hai create site ka res", createSiteResponse);
-
 //         const siteId = createSiteResponse.data.id;
 //         let netlifySiteUrl = createSiteResponse.data.url;
 
@@ -81,69 +79,91 @@ const checkNetlifySiteAvailability = async (slug) => {
 //             netlifySiteUrl = netlifySiteUrl.replace("http://", "https://");
 //         }
 
-//         // Download the ZIP file from Cloudinary
-//         const zipFileName = `${Date.now()}-${uuidv4()}.zip`;
-//         const zipPath = path.join(__dirname, zipFileName);
-//         const fileStream = fs.createWriteStream(zipPath);
-
-//         https.get(TemplateLink, (response) => {
-//             response.pipe(fileStream);
-
-//             fileStream.on("finish", async () => {
-//                 try {
-//                     // Deploy ZIP to Netlify
-//                     await axios.post(
-//                         `https://api.netlify.com/api/v1/sites/${siteId}/deploys`,
-//                         fs.createReadStream(zipPath),
-//                         {
-//                             headers: {
-//                                 Authorization: `Bearer ${process.env.NETLIFY_ACCESS_TOKEN}`,
-//                                 "Content-Type": "application/zip",
-//                             },
-//                         }
-//                     );
-
-//                     fs.unlinkSync(zipPath); // Cleanup ZIP file
-
-//                     // Update portfolio with new Netlify URL & unique slug
-//                     portfolio = await Portfolio.findByIdAndUpdate(
-//                         PortfolioId,
-//                         { deployLink: netlifySiteUrl, slug },
-//                         { new: true }
-//                     );
-
-//                     const user = await User.findById(userId);
-//                     const userName = user.firstName + " " + user.lastName;
-//                     const userEmail = user.email;
-
-//                     await mailSender(
-//                         userEmail,
-//                         `Successfully Deployed the Portfolio`,
-//                         portfolioDeployedTemplate(userName, netlifySiteUrl)
-//                     );
-
-//                     await Template.findByIdAndUpdate(
-//                         templateId,
-//                         { $addToSet: { usage: userId } }
-//                     );
-
-//                     return res.status(200).json({
-//                         success: true,
-//                         message: "Portfolio deployed successfully!",
-//                         deployLink: netlifySiteUrl,
-//                         newSlug: slug,
-//                     });
-//                 } catch (uploadError) {
-//                     return res.status(500).json({ message: "Error deploying to Netlify", error: uploadError });
-//                 }
-//             });
+//         // Step 3: Stream download from Cloudinary and directly upload to Netlify
+//         const cloudinaryStream = await axios({
+//             method: 'get',
+//             url: TemplateLink,
+//             responseType: 'stream',
 //         });
+
+//         await axios.post(
+//             `https://api.netlify.com/api/v1/sites/${siteId}/deploys`,
+//             cloudinaryStream.data,
+//             {
+//                 headers: {
+//                     Authorization: `Bearer ${process.env.NETLIFY_ACCESS_TOKEN}`,
+//                     "Content-Type": "application/zip",
+//                 },
+//             }
+//         );
+
+//         // Step 4: Update portfolio with new Netlify URL & unique slug
+//         portfolio = await Portfolio.findByIdAndUpdate(
+//             PortfolioId,
+//             { deployLink: netlifySiteUrl, slug },
+//             { new: true }
+//         );
+
+//         const user = await User.findById(userId);
+//         const userName = user.firstName + " " + user.lastName;
+//         const userEmail = user.email;
+
+//         await mailSender(
+//             userEmail,
+//             `Successfully Deployed the Portfolio`,
+//             portfolioDeployedTemplate(userName, netlifySiteUrl)
+//         );
+
+//         await Template.findByIdAndUpdate(
+//             templateId,
+//             { $addToSet: { usage: userId } }
+//         );
+
+//         return res.status(200).json({
+//             success: true,
+//             message: "Portfolio deployed successfully!",
+//             deployLink: netlifySiteUrl,
+//             newSlug: slug,
+//         });
+
 //     } catch (error) {
+//         console.error(error);
 //         return res.status(500).json({ message: "Deployment failed", error });
 //     }
 // };
 
+ 
+const waitForSiteReady = async (deployId) => {
+    const maxAttempts = 10;
+    let attempts = 0;
 
+    console.log(`🛠️ Waiting for deployment to be ready...`);
+
+    while (attempts < maxAttempts) {
+        const deployStatus = await axios.get(
+            `https://api.netlify.com/api/v1/deploys/${deployId}`,
+            {
+                headers: {
+                    Authorization: `Bearer ${process.env.NETLIFY_ACCESS_TOKEN}`,
+                },
+            }
+        );
+
+        const state = deployStatus.data.state;
+        console.log(`🔄 Attempt ${attempts + 1}: Deployment state is "${state}"`);
+
+        if (state === "ready") {
+            console.log(`Deployment is ready!`);
+            return true;
+        }
+
+        await new Promise(resolve => setTimeout(resolve, 5000)); // Wait 5 seconds
+        attempts++;
+    }
+
+    console.log(` Deployment not ready even after ${maxAttempts} attempts.`);
+    throw new Error("Deployment is not ready even after waiting.");
+};
 
 exports.deployPortfolio = async (req, res) => {
     try {
@@ -162,7 +182,7 @@ exports.deployPortfolio = async (req, res) => {
 
         const TemplateLink = template.TemplateLink;
 
-        // Check if Portfolio exists
+        // Fetch portfolio
         let portfolio = await Portfolio.findById(PortfolioId);
         if (!portfolio) {
             return res.status(404).json({ message: "Portfolio not found." });
@@ -170,9 +190,9 @@ exports.deployPortfolio = async (req, res) => {
 
         let { slug } = portfolio;
 
-        // Step 1: Check if original slug is available
+        // Step 1: Check if slug is available
         if (!(await checkNetlifySiteAvailability(slug))) {
-            const baseSlug = slug.replace(/-\w{4}$/, "").replace(/-+$/, ""); // Clean suffix & trailing dashes
+            const baseSlug = slug.replace(/-\w{4}$/, "").replace(/-+$/, "");
             let uniqueSlug = `${baseSlug}-${nanoid(4)}`;
 
             while (!(await checkNetlifySiteAvailability(uniqueSlug))) {
@@ -181,7 +201,7 @@ exports.deployPortfolio = async (req, res) => {
             slug = uniqueSlug;
         }
 
-        // Step 2: Create a new Netlify site with the available slug
+        // Step 2: Create new Netlify site
         const createSiteResponse = await axios.post(
             "https://api.netlify.com/api/v1/sites",
             { name: slug },
@@ -195,19 +215,18 @@ exports.deployPortfolio = async (req, res) => {
         const siteId = createSiteResponse.data.id;
         let netlifySiteUrl = createSiteResponse.data.url;
 
-        // Force HTTPS if the URL is HTTP
         if (netlifySiteUrl && netlifySiteUrl.startsWith("http://")) {
             netlifySiteUrl = netlifySiteUrl.replace("http://", "https://");
         }
 
-        // Step 3: Stream download from Cloudinary and directly upload to Netlify
+        // Step 3: Stream download from Cloudinary and deploy to Netlify
         const cloudinaryStream = await axios({
             method: 'get',
             url: TemplateLink,
             responseType: 'stream',
         });
 
-        await axios.post(
+        const deployResponse = await axios.post(
             `https://api.netlify.com/api/v1/sites/${siteId}/deploys`,
             cloudinaryStream.data,
             {
@@ -218,13 +237,19 @@ exports.deployPortfolio = async (req, res) => {
             }
         );
 
-        // Step 4: Update portfolio with new Netlify URL & unique slug
+        const deployId = deployResponse.data.id;
+
+        // Step 4: Wait for deployment to be ready
+        await waitForSiteReady(deployId);
+
+        // Step 5: Update Portfolio with deployLink and slug
         portfolio = await Portfolio.findByIdAndUpdate(
             PortfolioId,
             { deployLink: netlifySiteUrl, slug },
             { new: true }
         );
 
+        // Step 6: Send deployment email
         const user = await User.findById(userId);
         const userName = user.firstName + " " + user.lastName;
         const userEmail = user.email;
@@ -235,6 +260,7 @@ exports.deployPortfolio = async (req, res) => {
             portfolioDeployedTemplate(userName, netlifySiteUrl)
         );
 
+        // Step 7: Update Template usage
         await Template.findByIdAndUpdate(
             templateId,
             { $addToSet: { usage: userId } }

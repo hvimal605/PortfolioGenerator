@@ -109,7 +109,7 @@ export default function DeployPage() {
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.4 }}
-          className="bg-gray-950 p-4 rounded-lg  flex items-center justify-between  w-full max-w-xl border border-green-600 shadow-md relative sm:max-w-md"
+          className="bg-gray-950 p-4 rounded-lg  flex items-center justify-between w-full max-w-xl border border-green-600 shadow-md relative sm:max-w-md"
         >
           <div
             className="relative group  flex items-center gap-2 text-gray-300 truncate cursor-pointer hover:text-blue-500"
