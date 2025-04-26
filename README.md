@@ -3,10 +3,7 @@
 PortfolioGen is an intuitive platform designed to help you create and deploy your personal portfolio website in no time — without writing a single line of code! 🌟
 
 ## Live Demo:
-[Try PortfolioGen Now](https://lnkd.in/g-YUs-MX)
-
-## GitHub Repo:
-[PortfolioGen GitHub Repository](https://lnkd.in/gin99rMU)
+[Try PortfolioGen Now](https://theportfoliogenerator.netlify.app/)
 
 ## Table of Contents:
 - [What is PortfolioGen?](#what-is-portfoliogen)
