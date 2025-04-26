@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { GoogleLogin } from "@react-oauth/google";
 import { motion } from "framer-motion";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import myBackground from '../assets/images/loginbg.webp'; 
 
 import { useNavigate, } from "react-router-dom";
 import { useDispatch } from "react-redux"
@@ -68,7 +69,7 @@ const Signup = () => {
     setAccountType(ACCOUNT_TYPE.USER)
   }
 
-  
+
   const tabData = [
     {
       id: 1,
@@ -86,21 +87,21 @@ const Signup = () => {
 
   const handleGoogleLoginSuccess = (response) => {
     const { credential } = response;
-  
+
     if (!credential) {
       toast.error("Google signup failed: Missing credential");
       return;
     }
-  
+
     if (!accountType) {
       toast.error("Please select an account type before continuing");
       return;
     }
-  
+
     dispatch(googleSignup(credential, accountType, navigate));
   };
-  
-  
+
+
 
 
   const handleGoogleLoginError = () => {
@@ -114,7 +115,7 @@ const Signup = () => {
     <div
       className="flex items-center justify-center min-h-screen p-4 "
       style={{
-        backgroundImage: "url('https://www.shutterstock.com/shutterstock/videos/1104069995/thumb/1.jpg?ip=x480')",
+        backgroundImage: `url(${myBackground})`,
         backgroundPosition: "center",
       }}
     >
@@ -127,9 +128,9 @@ const Signup = () => {
         <h2 className="text-3xl font-bold text-center text-white mb-6 drop-shadow-[0_0_10px_#0ff]">Sign Up</h2>
         {error && <p className="text-red-500 text-center mb-4">{error}</p>}
 
-        
+
         {/* Toggle Tab */}
-      <Tab tabData={tabData} field={accountType} setField={setAccountType}   />
+        <Tab tabData={tabData} field={accountType} setField={setAccountType} />
 
         <form onSubmit={handleOnSubmit}>
           <div className="flex gap-4 mb-4">
@@ -140,7 +141,7 @@ const Signup = () => {
             >
               <label className="block text-sm font-semibold text-gray-400">First Name<sup className="text-pink-500">*</sup></label>
               <input
-              required
+                required
                 type="text"
                 name="firstName"
                 value={firstName}
@@ -156,7 +157,7 @@ const Signup = () => {
             >
               <label className="block text-sm font-semibold text-gray-400">Last Name<sup className="text-pink-500">*</sup></label>
               <input
-              required
+                required
                 type="text"
                 name="lastName"
                 value={lastName}
@@ -170,7 +171,7 @@ const Signup = () => {
           <motion.div className="mb-4" whileFocus={{ scale: 1.05 }} transition={{ duration: 0.2 }}>
             <label className="block text-sm font-semibold text-gray-400">Email<sup className="text-pink-500">*</sup></label>
             <input
-            required
+              required
               type="email"
               name="email"
               value={email}
@@ -184,7 +185,7 @@ const Signup = () => {
             <label className="block text-sm font-semibold text-gray-400">Password<sup className="text-pink-500">*</sup></label>
             <div className="relative">
               <input
-              required
+                required
                 type={showPassword ? "text" : "password"}
                 name="password"
                 value={password}
@@ -193,7 +194,7 @@ const Signup = () => {
                 placeholder="Enter your password"
               />
               <button
-              required
+                required
                 type="button"
                 className="absolute inset-y-0 right-3 flex items-center text-gray-400"
                 onClick={() => setShowPassword(!showPassword)}
@@ -207,7 +208,7 @@ const Signup = () => {
             <label className="block text-sm font-semibold text-gray-400"> Confirm Password<sup className="text-pink-500">*</sup></label>
             <div className="relative">
               <input
-              required
+                required
                 type={showconfirmPassword ? "text" : "password"}
                 name="confirmPassword"
                 value={confirmPassword}
@@ -250,7 +251,7 @@ const Signup = () => {
             theme="filled_black"
             width="100%"
             text="continue_with"
-            
+
           />
         </motion.div>
 

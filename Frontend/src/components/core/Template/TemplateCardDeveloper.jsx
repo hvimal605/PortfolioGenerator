@@ -3,7 +3,7 @@ import { FaDownload } from "react-icons/fa";
 import { SlCalender } from "react-icons/sl";
 import { MdDone } from "react-icons/md";
 import { TbInfoCircle } from "react-icons/tb";
-import AnimatedButton2 from "../../common/AnimatedButton2";
+
 import { format } from "date-fns";
 
 export default function TemplateCardDeveloper({ template }) {
@@ -65,27 +65,20 @@ export default function TemplateCardDeveloper({ template }) {
         </div>
 
         {/* Buttons Row */}
-      {/* Buttons Row */}
-<div className="flex flex-col sm:flex-row justify-center sm:justify-between items-center sm:items-start gap-4 pt-4">
-  <a
-    href={template.previewUrl}
-    target="_blank"
-    rel="noopener noreferrer"
-    className="w-full sm:w-auto flex justify-center"
-  >
-    <AnimatedButton2 text="Preview Template" />
-  </a>
+        {/* Buttons Row */}
+        <div className="flex flex-col sm:flex-row justify-center sm:justify-between items-center sm:items-start gap-4 pt-4">
+         
 
-  <a
-    href={template.uploadedUrl}
-    target="_blank"
-    rel="noopener noreferrer"
-    className="text-white hover:text-pink-500 text-2xl transition duration-300 flex justify-center"
-    title="Download Template"
-  >
-    <FaDownload />
-  </a>
-</div>
+          <a
+            href={template.uploadedUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-white hover:text-pink-500 text-2xl transition duration-300 flex justify-center"
+            title="Download Template"
+          >
+            <FaDownload />
+          </a>
+        </div>
 
       </div>
     </motion.div>

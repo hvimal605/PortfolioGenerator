@@ -167,18 +167,26 @@ const generateUniqueSlug = async (FirstName) => {
   let isUnique = false;
 
   while (!isUnique) {
-    const baseSlug = FirstName.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+    let baseSlug = FirstName
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9\s]/g, "")   // Remove special chars except space
+      .replace(/\s+/g, "-")          // Replace spaces with single dash
+      .replace(/-+/g, "-")           // Remove multiple dashes
+
+    baseSlug = baseSlug.replace(/^-+|-+$/g, ""); // Remove starting/ending dashes
+
     slug = `${baseSlug}-${nanoid()}`;
 
-    // Check if slug already exists in the database
     const existingPortfolio = await Portfolio.findOne({ slug });
     if (!existingPortfolio) {
-      isUnique = true; // Exit loop if slug is unique
+      isUnique = true;
     }
   }
 
   return slug;
 };
+
 
 exports.createPortfolio = async (req, res) => {
   try {

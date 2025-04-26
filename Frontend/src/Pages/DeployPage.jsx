@@ -109,15 +109,15 @@ export default function DeployPage() {
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.4 }}
-          className="bg-gray-950 p-4 rounded-lg flex items-center justify-between w-full max-w-sm border border-green-600 shadow-md relative sm:max-w-xs"
+          className="bg-gray-950 p-4 rounded-lg  flex items-center justify-between  w-full max-w-xl border border-green-600 shadow-md relative sm:max-w-md"
         >
           <div
-            className="relative group flex items-center gap-2 text-gray-300 truncate cursor-pointer hover:text-blue-500"
+            className="relative group  flex items-center gap-2 text-gray-300 truncate cursor-pointer hover:text-blue-500"
             onMouseEnter={() => setHovered(true)}
             onMouseLeave={() => setHovered(false)}
           >
             <div className="h-4 w-4 rounded-full bg-green-400 animate-pulse"></div>
-            <span className="truncate font-semibold text-lg flex items-center gap-2 sm:text-base">
+            <span className="truncate font-semibold text-lg flex items-center justify-center gap-2 sm:text-xl">
               <Link to={`${deplyedLink}`} target="_blank" className="text-blue-400 hover:underline">
                 {`${deplyedLink}`}
               </Link>

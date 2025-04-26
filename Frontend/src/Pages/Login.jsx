@@ -5,7 +5,7 @@ import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { googleLogin, login } from "../services/operations/authApi";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-
+import myBackground from '../assets/images/loginbg.webp'; 
 const Login = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -46,14 +46,13 @@ const Login = () => {
 
   return (
     
-      <div
-        className="relative flex items-center justify-center h-[94vh] p-4"
-        style={{
-          backgroundImage:
-            "url('https://www.shutterstock.com/shutterstock/videos/1104069995/thumb/1.jpg?ip=x480')",
-          backgroundPosition: "center",
-        }}
-      >
+    <div
+    className="relative flex items-center justify-center h-[94vh] p-4"
+    style={{
+      backgroundImage: `url(${myBackground})`,
+      backgroundPosition: "center",
+    }}
+  >
         {/* Gradient Overlay */}
         {/* <div className="absolute inset-0 bg-gradient-to-br from-black/70 to-gray-900/60 backdrop-blur-sm z-0" /> */}
   
