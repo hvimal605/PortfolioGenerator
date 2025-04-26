@@ -133,12 +133,13 @@ const checkNetlifySiteAvailability = async (slug) => {
 // };
 
  
-const waitForSiteReady = async (deployId) => {
-    const maxAttempts = 10;
+const waitForSiteReady = async (deployId, siteUrl) => {
+    const maxAttempts = 12;
     let attempts = 0;
 
-    console.log(`🛠️ Waiting for deployment to be ready...`);
+    console.log(` Waiting for deployment to be ready...`);
 
+    // Step 1: Check deployment state
     while (attempts < maxAttempts) {
         const deployStatus = await axios.get(
             `https://api.netlify.com/api/v1/deploys/${deployId}`,
@@ -150,20 +151,39 @@ const waitForSiteReady = async (deployId) => {
         );
 
         const state = deployStatus.data.state;
-        console.log(`🔄 Attempt ${attempts + 1}: Deployment state is "${state}"`);
+        console.log(` Attempt ${attempts + 1}: Deployment state is "${state}"`);
 
         if (state === "ready") {
-            console.log(`Deployment is ready!`);
-            return true;
+            console.log(` Deployment is ready!`);
+            break;
         }
 
-        await new Promise(resolve => setTimeout(resolve, 5000)); // Wait 5 seconds
+        await new Promise(resolve => setTimeout(resolve, 5000)); // Wait 5 sec
         attempts++;
     }
 
-    console.log(` Deployment not ready even after ${maxAttempts} attempts.`);
-    throw new Error("Deployment is not ready even after waiting.");
+    // Step 2: Check actual URL availability
+    console.log(` Verifying if site is live: ${siteUrl}`);
+    let urlAttempts = 0;
+    while (urlAttempts < maxAttempts) {
+        try {
+            const response = await axios.get(siteUrl);
+            if (response.status === 200) {
+                console.log(` Site is live and accessible!`);
+                return true;
+            }
+        } catch (error) {
+            console.log(` Attempt ${urlAttempts + 1}: Site not live yet...`);
+        }
+
+        await new Promise(resolve => setTimeout(resolve, 3000)); // Wait 3 sec
+        urlAttempts++;
+    }
+
+    console.log(` Site not accessible after deployment.`);
+    throw new Error("Site is not live even after deployment ready.");
 };
+
 
 exports.deployPortfolio = async (req, res) => {
     try {
@@ -240,7 +260,7 @@ exports.deployPortfolio = async (req, res) => {
         const deployId = deployResponse.data.id;
 
         // Step 4: Wait for deployment to be ready
-        await waitForSiteReady(deployId);
+        await waitForSiteReady(deployId ,netlifySiteUrl);
 
         // Step 5: Update Portfolio with deployLink and slug
         portfolio = await Portfolio.findByIdAndUpdate(
