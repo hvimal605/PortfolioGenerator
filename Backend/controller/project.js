@@ -27,19 +27,12 @@ exports.addNewProject = async (req, res) => {
 
         } = req.body;
 
-        console.log("dekhe ky NHI ARAH H ", title,
-            description,
-            gitRepoLink,
-            projectLink,
-
-            technologies,
-            portfolioId)
 
         if (
             !title ||
             !description ||
             !gitRepoLink ||
-            !projectLink ||
+         
 
             !technologies
         ) {

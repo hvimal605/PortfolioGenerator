@@ -32,6 +32,7 @@ export const TemplateEndpoints = {
 export const TimelineEndpoints = {
   Create_Timeline: BASE_URL +"/timeline/createTimeline",
   Delete_Timeline:BASE_URL +"/timeline/deleteTimeline",
+  UpdateTimeline_API:BASE_URL +"/timeline/updateTimeline",
  }
 
  export const skillEndpoints = {

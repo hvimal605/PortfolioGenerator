@@ -67,25 +67,40 @@ const portfolioSchema = new mongoose.Schema({
     },
     
   },
-  socialLinks: {
-    linkedIn: {
-      type: String,
+  // socialLinks: {
+  //   linkedIn: {
+  //     type: String,
 
+  //   },
+  //   github: {
+  //     type: String,
+
+  //   },
+  //   twitter: {
+  //     type: String,
+
+  //   },
+  //   personalWebsite: {
+  //     type: String,
+
+  //   },
+
+  // },
+
+
+  socialLinks: [
+    {
+      platform: {
+        type: String,
+        // required: true,
+      },
+      url: {
+        type: String,
+        // required: true,
+      },
     },
-    github: {
-      type: String,
-
-    },
-    twitter: {
-      type: String,
-
-    },
-    personalWebsite: {
-      type: String,
-
-    },
-
-  },
+  ],
+  
   projects: [
     {
       type: mongoose.Schema.Types.ObjectId,

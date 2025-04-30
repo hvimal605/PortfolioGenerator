@@ -54,7 +54,7 @@ const PortfolioCreatePage = () => {
   };
 
   return (
-    <div className="relative flex flex-col items-center justify-center min-h-screen bg-black text-white font-sans  overflow-hidden">
+    <div className="relative flex flex-col items-center justify-center h-[94vh] bg-black text-white font-sans  overflow-hidden">
       {/* Dotted animated background */}
       <div className="absolute inset-0 bg-dot-pattern opacity-30 animate-moveDots"></div>
 
@@ -99,14 +99,14 @@ const PortfolioCreatePage = () => {
 </h2>
 
             {/* Template Selection Section */}
-            <div className=" w-full h-[78vh] overflow-y-auto  p-2 rounded-lg">
+            <div className=" w-full h-[70vh] overflow-y-auto  p-2 rounded-lg">
               <TemplateSelection onTemplateSelect={handleTemplateSelect} />
             </div>
 
             {selectedTemplate && (
               <motion.button
                 type="button"
-                className="mt-1"
+                className="mt-3"
                 whileTap={{ scale: 0.95 }}
                 onClick={handleUploadDetails}
               >

@@ -5,12 +5,6 @@ const skillSchema = new mongoose.Schema({
     type: String,
     required: true, 
   },
-  proficiency: {
-    type: Number,
-    required: true, 
-    min: 0,
-    max: 100,
-  },
   svg: {
     public_id: {
       type: String,

@@ -7,6 +7,7 @@ import {
   FaGithub,
   FaUserAlt,
 } from "react-icons/fa";
+
 import { motion } from 'framer-motion';
 
 
@@ -15,13 +16,17 @@ import { FaCamera } from "react-icons/fa";
 import { IoIosLink } from "react-icons/io";
 import { useSelector } from "react-redux";
 import { updatePortfolioDetails } from "../../../../services/operations/PortfolioApi";
-import { MdDone } from "react-icons/md";
+import { MdDeleteOutline, MdDone } from "react-icons/md";
 import { AiOutlineEdit } from "react-icons/ai";
 import ResumeViewer from "./ResumeViewer";
+// import socialIcons from "../../../common/SocialIcons";
+import iconMap from "../../../common/IconMap";
+
 
 export const PersonalportfolioData = ({ portfolioData }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({ ...portfolioData });
+  
   const [profileImageFile, setProfileImageFile] = useState(null);
   const [resumeFile, setResumeFile] = useState(null);
 
@@ -88,10 +93,9 @@ export const PersonalportfolioData = ({ portfolioData }) => {
       form.append("LastName", formData.LastName);
       form.append("phone", formData.contactDetails.phone);
       form.append("email", formData.contactDetails.email);
-      form.append("linkedIn", formData.socialLinks.linkedIn || "");
-      form.append("github", formData.socialLinks.github || "");
-      form.append("twitter", formData.socialLinks.twitter || "");
-      form.append("personalWebsite", formData.socialLinks.personalWebsite || "");
+     
+      form.append("socialLinks", JSON.stringify(formData.socialLinks));
+
 
       form.append("aboutme", formData.aboutme || "");
       form.append("roles", formData.roles.join(","));
@@ -126,7 +130,14 @@ export const PersonalportfolioData = ({ portfolioData }) => {
     setResumeFile(null); 
   }, [portfolioData]); 
   
-  
+  // const socialIcons = {
+  //   linkedin: <FaLinkedin className="text-blue-500" />,
+  //   github: <FaGithub className="text-gray-200" />,
+  //   twitter: <FaTwitter className="text-blue-400" />,
+  //   personalwebsite: <IoIosLink className="text-pink-500" />,
+  //   facebook: <FaFacebook className="text-blue-600" />,
+  //   instagram: <FaInstagram className="text-pink-600" />,
+  // };
 
 
 
@@ -292,42 +303,111 @@ export const PersonalportfolioData = ({ portfolioData }) => {
 
       </div>
 
-      {/* Social Links */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mt-6 text-lg">
-        {["linkedIn", "github", "twitter", "personalWebsite"].map((key) => {
-          const icons = {
-            linkedIn: <FaLinkedin className="text-blue-500" />,
-            github: <FaGithub className="text-gray-200" />,
-            twitter: <FaTwitter className="text-blue-400" />,
-            personalWebsite: <IoIosLink className="text-pink-500" />,
-          };
-          return isEditing ? (
-            <div key={key} className="flex items-center gap-2">
-              {icons[key]}
-              <input
-                name={`socialLinks.${key}`}
-                value={formData.socialLinks?.[key] || ""}
-                onChange={handleChange}
-                placeholder={`${key} URL`}
-                className="input-style"
-              />
-            </div>
-          ) : (
-            formData.socialLinks?.[key] && (
-              <a
-                key={key}
-                href={formData.socialLinks[key]}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 hover:underline"
-              >
-                {icons[key]}
-                {key.charAt(0).toUpperCase() + key.slice(1)}
-              </a>
-            )
-          );
-        })}
+   
+
+
+{/* Social Links */}
+<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mt-8 text-lg">
+  {formData.socialLinks?.map((linkObj, index) => (
+    <div
+      key={linkObj._id || index}
+      className="p-6 bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl space-y-4 border border-transparent hover:border-yellow-500 transition-all ease-in-out duration-300 shadow-lg hover:shadow-yellow-500/30 group"
+    >
+      {/* First Line: Icon + Platform + Remove */}
+      <div className="flex items-center gap-3">
+        {iconMap[linkObj.platform?.toLowerCase()] || iconMap["default"]}
+
+        {isEditing ? (
+          <>
+            <input
+              required
+              type="text"
+              value={linkObj.platform}
+              placeholder="Platform (e.g. GitHub)"
+              className="w-44 bg-gray-800 text-white border border-gray-700 rounded-lg px-3 py-2 transition duration-200 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+              onChange={(e) => {
+                const updatedLinks = [...formData.socialLinks];
+                updatedLinks[index].platform = e.target.value;
+                setFormData((prev) => ({
+                  ...prev,
+                  socialLinks: updatedLinks,
+                }));
+              }}
+            />
+            <button
+              onClick={() => {
+                const updatedLinks = formData.socialLinks.filter(
+                  (_, i) => i !== index
+                );
+                setFormData((prev) => ({
+                  ...prev,
+                  socialLinks: updatedLinks,
+                }));
+              }}
+              className="ml-auto text-red-500 hover:text-red-400 text-2xl transition-all duration-200"
+            >
+              <MdDeleteOutline />
+            </button>
+          </>
+        ) : (
+          <span className="text-white font-semibold">{linkObj.platform}</span>
+        )}
       </div>
+
+      {/* Second Line: URL Input */}
+      {isEditing ? (
+        <input
+          required
+          type="url"
+          value={linkObj.url}
+          placeholder="https://your-link.com"
+          className="w-full bg-gray-800 text-white border border-gray-700 rounded-lg px-4 py-3 transition duration-200 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+          onChange={(e) => {
+            const updatedLinks = [...formData.socialLinks];
+            updatedLinks[index].url = e.target.value;
+            setFormData((prev) => ({
+              ...prev,
+              socialLinks: updatedLinks,
+            }));
+          }}
+        />
+      ) : (
+        <a
+          href={linkObj.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="block text-blue-400 hover:text-blue-300 hover:underline break-words transition-all duration-200"
+        >
+          {linkObj.url}
+        </a>
+      )}
+    </div>
+  ))}
+
+  {/* Add New Link Button */}
+  {isEditing && (
+    <button
+      type="button"
+      onClick={() =>
+        setFormData((prev) => ({
+          ...prev,
+          socialLinks: [...prev.socialLinks, { platform: "", url: "" }],
+        }))
+      }
+      className="p-4 border-2 border-dashed border-yellow-400 rounded-xl text-yellow-400 hover:text-yellow-300 hover:border-yellow-300 transition-all ease-in-out duration-300 flex items-center justify-center text-xl font-semibold"
+    >
+      + Add Social Link
+    </button>
+  )}
+</div>
+
+
+
+
+
+
+
+
 
       {/* Save Button */}
       {isEditing && (

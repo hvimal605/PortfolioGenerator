@@ -14,9 +14,9 @@ exports.addSkill = async (req, res) => {
         }
 
         const { skillSvg } = req.files;
-        const { title, proficiency, portfolioId } = req.body;
+        const { title, portfolioId } = req.body;
 
-        if (!title || !proficiency) {
+        if (!title ) {
             return res.status(400).json({
                 success: false,
                 message: "Please fill all the details !"
@@ -32,7 +32,7 @@ exports.addSkill = async (req, res) => {
 
         const SkillRes = await skill.create({
             title,
-            proficiency,
+           
             svg: {
                 public_id: image.public_id,
                 url: image.secure_url,
@@ -99,7 +99,7 @@ exports.deleteSkill = async (req, res) => {
 
 exports.updateSkill = async (req, res) => {
     try {
-        const { skillId, proficiency } = req.body;
+        const { skillId } = req.body;
 
         let skillDetail = await skill.findById(skillId);
         if (!skillDetail) {
@@ -109,7 +109,7 @@ exports.updateSkill = async (req, res) => {
             });
         }
 
-        const updateData = { proficiency };
+        const updateData = {  };
 
         // Handle image update if provided
         if (req.files && req.files.svg) {

@@ -111,3 +111,50 @@ exports.getAllTimeline = async (req, res) => {
         })
     }
 }
+
+exports.updateTimeline = async (req, res) => {
+    try {
+      
+      const { timelineId, title, description, from, to } = req.body;
+  
+      // Check for required fields
+      if (!title || !description || !from || !to) {
+        return res.status(400).json({
+          success: false,
+          message: "Please fill all the details",
+        });
+      }
+  
+      // Find and update the timeline
+      const updatedTimeline = await Timeline.findByIdAndUpdate(
+        timelineId,
+        {
+          title,
+          description,
+          timeline: { from, to },
+        },
+        { new: true } // Return updated document
+      );
+  
+      // If timeline not found
+      if (!updatedTimeline) {
+        return res.status(404).json({
+          success: false,
+          message: "Timeline not found",
+        });
+      }
+  
+      res.status(200).json({
+        success: true,
+        message: "Timeline updated successfully",
+        updatedTimeline,
+      });
+    } catch (error) {
+      console.error("Error updating timeline:", error);
+      return res.status(500).json({
+        success: false,
+        message: "Something went wrong while updating the timeline",
+      });
+    }
+  };
+  

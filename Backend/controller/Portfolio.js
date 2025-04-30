@@ -190,22 +190,29 @@ const generateUniqueSlug = async (FirstName) => {
 
 exports.createPortfolio = async (req, res) => {
   try {
-    const {
-      templateId,
-      FirstName,
-      LastName,
-      phone,
-      email,
-      linkedIn,
-      github,
-      twitter,
-      personalWebsite,
-      roles,
-      aboutme,
-    } = req.body;
+    let socialLinks = [];
+    console.log("SOCIAL LINKS RAW BODY:", req.body.socialLinks);
 
+    // Extract stringified array from req.body (FormData sends them as array of strings)
+    if (req.body.socialLinks) {
+      try {
+        const links = Array.isArray(req.body.socialLinks)
+          ? req.body.socialLinks
+          : [req.body.socialLinks]; // In case there's only one item
+    
+        socialLinks = links.map((linkStr) => JSON.parse(linkStr));
+      } catch (err) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid format for socialLinks",
+        });
+      }
+    }
+    // Extract other necessary fields from the request body
+    const { templateId, FirstName, LastName, phone, email, roles, aboutme } = req.body;
     const userId = req.user.id;
 
+    // Validate required fields
     if (!userId || !templateId || !email || !phone) {
       return res.status(400).json({
         success: false,
@@ -213,17 +220,11 @@ exports.createPortfolio = async (req, res) => {
       });
     }
 
-    const templateExists = await Template.findById(templateId);
-    if (!templateExists) {
-      return res.status(400).json({
-        success: false,
-        message: "Template not found.",
-      });
-    }
-
+    // Handle avatar and resume file uploads...
     const avatar = req.files?.avatar;
     const resume = req.files?.resume;
 
+    // Ensure avatar is present
     if (!avatar) {
       return res.status(400).json({
         success: false,
@@ -231,23 +232,17 @@ exports.createPortfolio = async (req, res) => {
       });
     }
 
-    const profileImageUpload = await uploadImageToCloudinary(
-      avatar,
-      process.env.FOLDER_NAME,
-      1000,
-      1000
-    );
+    // Upload avatar to Cloudinary
+    const profileImageUpload = await uploadImageToCloudinary(avatar, process.env.FOLDER_NAME, 1000, 1000);
 
-    // ✅ Resume is optional
+    // Resume is optional
     let resumeUrl = "";
     if (resume) {
-      const resumeUpload = await uploadImageToCloudinary(
-        resume,
-        process.env.FOLDER_NAME
-      );
+      const resumeUpload = await uploadImageToCloudinary(resume, process.env.FOLDER_NAME);
       resumeUrl = resumeUpload.secure_url;
     }
 
+    // Ensure FirstName is provided for slug generation
     if (!FirstName) {
       return res.status(400).json({
         success: false,
@@ -255,35 +250,43 @@ exports.createPortfolio = async (req, res) => {
       });
     }
 
+    // Generate a unique slug for the portfolio
     const slug = await generateUniqueSlug(FirstName);
 
+    // Create the portfolio in the database
     const portfolio = await Portfolio.create({
       userId,
       templateId,
       deployLink: "",
       profileImage: profileImageUpload.secure_url,
-      resume: resumeUrl, // ✅ Optional resume
-      skills: [],
+      resume: resumeUrl, // Optional resume
+      skills: [], // Empty array for now
       FirstName,
       LastName,
       aboutme: aboutme || "",
       roles: roles || [],
       contactDetails: { phone, email },
-      socialLinks: { linkedIn, github, twitter, personalWebsite },
-      projects: [],
-      softwareApplications: [],
-      timeline: [],
+      socialLinks: socialLinks.map(link => ({
+        platform: link.label,
+        url: link.url,
+      })),
+      projects: [], // Empty array for now
+      softwareApplications: [], // Empty array for now
+      timeline: [], // Empty array for now
       slug,
     });
 
+    // Update the user document with the newly created portfolio
     await User.findByIdAndUpdate(userId, { $push: { portfolios: portfolio._id } });
 
+    // Send a success response
     res.status(201).json({
       success: true,
       message: "Portfolio created successfully!",
       portfolio,
     });
   } catch (error) {
+    // Log the error and send a server error response
     console.error("Error creating portfolio:", error);
     res.status(500).json({
       success: false,
@@ -291,6 +294,7 @@ exports.createPortfolio = async (req, res) => {
     });
   }
 };
+
 
 
 
@@ -302,16 +306,27 @@ exports.updatePortfolioDetails = async (req, res) => {
       LastName,
       phone,
       email,
-
-      linkedIn,
-      github,
-      twitter,
-      personalWebsite,
       aboutme,
-      roles, // either array or comma-separated string
+      roles, 
+      socialLinks,
     } = req.body;
+  
+  
+   
+    let parsedSocialLinks = socialLinks;
+    if (typeof socialLinks === 'string') {
+      try {
+        parsedSocialLinks = JSON.parse(socialLinks); 
+      } catch (error) {
+        console.error("Error parsing socialLinks:", error);
+        return res.status(400).json({
+          success: false,
+          message: "Invalid socialLinks format.",
+        });
+      }
+    }
 
-
+   
 
     if (!portfolioId) {
       return res.status(400).json({
@@ -320,6 +335,7 @@ exports.updatePortfolioDetails = async (req, res) => {
       });
     }
 
+    // Fetch the portfolio
     const portfolio = await Portfolio.findById(portfolioId);
     if (!portfolio) {
       return res.status(404).json({
@@ -327,6 +343,8 @@ exports.updatePortfolioDetails = async (req, res) => {
         message: "Portfolio not found.",
       });
     }
+
+   
 
     // Handle optional file uploads
     const avatar = req.files?.avatar;
@@ -353,8 +371,10 @@ exports.updatePortfolioDetails = async (req, res) => {
       resumeUrl = resumeUpload.secure_url;
     }
 
-    // Handle roles, converting comma-separated string to an array if needed
-    let updatedRoles = Array.isArray(roles) ? roles : roles?.split(",").map(role => role.trim());
+    // Handle roles: support both array and comma-separated string
+    const updatedRoles = Array.isArray(roles)
+      ? roles
+      : roles?.split(",").map((role) => role.trim());
 
     // Update portfolio fields
     portfolio.FirstName = FirstName || portfolio.FirstName;
@@ -364,27 +384,37 @@ exports.updatePortfolioDetails = async (req, res) => {
     portfolio.aboutme = aboutme || portfolio.aboutme;
     portfolio.roles = updatedRoles || portfolio.roles;
 
+    // Update contact details
     portfolio.contactDetails = {
       phone: phone || portfolio.contactDetails.phone,
       email: email || portfolio.contactDetails.email,
-
     };
 
-    portfolio.socialLinks = {
-      linkedIn: linkedIn || portfolio.socialLinks.linkedIn,
-      github: github || portfolio.socialLinks.github,
-      twitter: twitter || portfolio.socialLinks.twitter,
-      personalWebsite: personalWebsite || portfolio.socialLinks.personalWebsite,
-    };
+    // Compare the socialLinks to detect changes
+    if (Array.isArray(parsedSocialLinks)) {
+     
+      const isSocialLinksChanged = JSON.stringify(parsedSocialLinks) !== JSON.stringify(portfolio.socialLinks);
+
+      if (isSocialLinksChanged) {
+        console.log("SocialLinks are different, updating...");
+
+        portfolio.socialLinks = [...parsedSocialLinks]; // Reassign socialLinks to a new array
+        portfolio.markModified("socialLinks"); // Mark the field as modified to trigger Mongoose update
+      } else {
+        console.log("SocialLinks are the same, no update needed.");
+      }
+    }
+
+    console.log("Updated socialLinks to be saved:", portfolio.socialLinks);
 
     portfolio.updatedAt = new Date();
 
-    await portfolio.save();
+    const updatedPortfolio = await portfolio.save(); 
 
     res.status(200).json({
       success: true,
       message: "Portfolio updated successfully!",
-      updatedPortfolio: portfolio,  // Return the updated portfolio
+      updatedPortfolio: updatedPortfolio,
     });
   } catch (error) {
     console.error("Error updating portfolio:", error);
@@ -394,10 +424,6 @@ exports.updatePortfolioDetails = async (req, res) => {
     });
   }
 };
-
-
-
-
 
 
 exports.getPortfolioDetailsById = async (req, res) => {
@@ -433,7 +459,7 @@ exports.getPortfolioDetailsById = async (req, res) => {
 
 exports.getPortfolioBySlug = async (req, res) => {
   try {
-    const { slug } = req.body; 
+    const { slug } = req.body;
 
     if (!slug) {
       return res.status(400).json({
@@ -444,12 +470,12 @@ exports.getPortfolioBySlug = async (req, res) => {
 
     // Find portfolio by slug
     const portfolio = await Portfolio.findOne({ slug })
-      .populate("userId", "email") 
+      .populate("userId", "email")
       .populate("templateId")
-      .populate("skills") 
-      .populate("projects") 
-      .populate("softwareApplications") 
-      .populate("timeline"); 
+      .populate("skills")
+      .populate("projects")
+      .populate("softwareApplications")
+      .populate("timeline");
 
     if (!portfolio) {
       return res.status(404).json({
@@ -519,43 +545,6 @@ exports.getPortfoliosForUser = async (req, res) => {
 };
 
 
-
-
-
-// exports.trackVisitofPortfolio = async (req, res) => {
-//   const { slug } = req.body;
-//   const ip = req.ip;
-
-//   try {
-//     const portfolio = await Portfolio.findOne({ slug });
-//     if (!portfolio) return res.status(404).json({ message: "Portfolio not found" });
-
-//     // Check if IP is already counted for unique visitors
-//     const alreadyVisited = await Visitor.findOne({
-//       portfolioId: portfolio._id,
-//       ip
-//     });
-
-//     // Always record the visit
-//     await Visitor.create({ portfolioId: portfolio._id, ip });
-
-//     // If new IP, update unique count
-//     if (!alreadyVisited) {
-//       portfolio.uniqueVisitors += 1;
-//     }
-
-//     portfolio.totalVisitors += 1;
-//     await portfolio.save();
-
-//     res.status(200).json({ success: true, message: "Visit tracked" });
-
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ message: "Server error" });
-//   }
-// };
-
-
 exports.trackVisitofPortfolio = async (req, res) => {
 
 
@@ -603,7 +592,6 @@ exports.trackVisitofPortfolio = async (req, res) => {
 
 
 
-
 exports.getVisitorStats = async (req, res) => {
   try {
     const { portfolioId } = req.body;
@@ -629,8 +617,6 @@ exports.getVisitorStats = async (req, res) => {
     res.status(500).json({ success: false, message: "Server error" });
   }
 };
-
-
 
 
 

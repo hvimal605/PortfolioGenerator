@@ -4,7 +4,8 @@ import { apiConnector } from "../apiConnector";
 
 const {
   Create_Timeline,
-  Delete_Timeline
+  Delete_Timeline,
+  UpdateTimeline_API
 } = TimelineEndpoints
 
 const {
@@ -30,10 +31,10 @@ const {
   UPDATE_PROJECT_API_URL
 } = projectEndpoints
 
-const { GET_ALL_MESSAGES , DELETE_MESSAGE ,TOGGLE_EMAIL_NOTIFICATION} = messgaeEndPoints
+const { GET_ALL_MESSAGES, DELETE_MESSAGE, TOGGLE_EMAIL_NOTIFICATION } = messgaeEndPoints
 
 
-const { ADD_SOFTWARE_APPLICATION, Delete_Software_Application ,UPDATE_SOFTWARE_APP_API_URL } = SoftwareAppEndpoints
+const { ADD_SOFTWARE_APPLICATION, Delete_Software_Application, UPDATE_SOFTWARE_APP_API_URL } = SoftwareAppEndpoints
 
 
 export const createTimeline = async (timelineData, token) => {
@@ -84,8 +85,39 @@ export const deleteTimeline = async ({ Timelineid, portfolioId, token }) => {
 
   } catch (error) {
     console.error("DELETE_TIMELINE_API ERROR:", error);
-    toast.error(error.response.data.message|| "Something went wrong while deleting the timeline");
+    toast.error(error.response.data.message || "Something went wrong while deleting the timeline");
     return false;
+
+  } finally {
+    toast.dismiss(toastId);
+  }
+};
+
+
+export const updateTimeline = async ({ timelineId, title, description, from, to, token }) => {
+  const toastId = toast.loading("Updating Timeline...");
+
+  try {
+    const response = await apiConnector(
+      "PUT",
+      UpdateTimeline_API, 
+      { timelineId, title, description, from, to },
+      {
+        Authorization: `Bearer ${token}`,
+      }
+    );
+
+    if (!response?.data?.success) {
+      throw new Error(response?.data?.message || "Could not update timeline.");
+    }
+
+    toast.success("Timeline updated successfully!");
+    return response.data.updatedTimeline;
+
+  } catch (error) {
+    console.error("UPDATE_TIMELINE_API ERROR:", error);
+    toast.error(error?.response?.data?.message || "Something went wrong while updating the timeline.");
+    return null;
 
   } finally {
     toast.dismiss(toastId);
@@ -216,7 +248,7 @@ export const deleteSoftwareApp = async ({ softwareId, portfolioId, token }) => {
   try {
     const response = await apiConnector(
       "DELETE",
-      Delete_Software_Application, 
+      Delete_Software_Application,
       { applicationId: softwareId, portfolioId },
       {
         Authorization: `Bearer ${token}`,
@@ -234,7 +266,7 @@ export const deleteSoftwareApp = async ({ softwareId, portfolioId, token }) => {
 
   } catch (error) {
     console.error("DELETE_SOFTWARE_APP_API ERROR:", error);
-    toast.error(error.response.data.message|| "Something went wrong while deleting the software application");
+    toast.error(error.response.data.message || "Something went wrong while deleting the software application");
     return false;
 
   } finally {
@@ -361,10 +393,16 @@ export const updateProject = async (formData, token) => {
 
 
 export const addPersonalDetails = async (personalData, token) => {
-  let result = null
-  const toastId = toast.loading("Adding Personal Deatails ...");
+  let result = null;
+  const toastId = toast.loading("Adding Personal Details ...");
 
   try {
+    // Ensure socialLinks is correctly formatted
+    if (Array.isArray(personalData.socialLinks)) {
+      personalData.socialLinks = JSON.stringify(personalData.socialLinks);
+    }
+
+    // Send the request with the properly formatted personalData
     const response = await apiConnector("POST", CREATE_PORTFOLIO, personalData, {
       "Content-Type": "multipart/form-data",
       Authorization: `Bearer ${token}`,
@@ -372,21 +410,20 @@ export const addPersonalDetails = async (personalData, token) => {
 
     console.log("Add PERSONAL DETAILS API Response:", response);
 
-
     if (!response?.data?.success) {
       throw new Error(response?.data?.message || "Could not add Personal details.");
     }
 
     toast.success("Personal details added successfully!");
-    result = response?.data?.portfolio
+    result = response?.data?.portfolio;
 
   } catch (error) {
     console.error("PERSONAL_DETAILS_API ERROR:", error);
-    toast.error(error.response.data.message || "Something went wrong while adding the Personal details");
+    toast.error(error?.response?.data?.message || "Something went wrong while adding the Personal details");
   }
 
   toast.dismiss(toastId);
-  return result
+  return result;
 };
 
 export const updatePortfolioDetails = async (formData, token) => {
@@ -395,7 +432,7 @@ export const updatePortfolioDetails = async (formData, token) => {
 
   try {
     // Send the API request to update the portfolio with FormData
-    const response = await apiConnector("PUT",UPDATE_PORTFOLIO_DETAILS , formData, {
+    const response = await apiConnector("PUT", UPDATE_PORTFOLIO_DETAILS, formData, {
       "Content-Type": "multipart/form-data",
       Authorization: `Bearer ${token}`,
     });
@@ -410,7 +447,7 @@ export const updatePortfolioDetails = async (formData, token) => {
     result = response.data;
   } catch (error) {
     console.error("UPDATE_PORTFOLIO_DETAILS ERROR:", error);
-    toast.error(error.response.data.message|| "Something went wrong while updating portfolio");
+    toast.error(error.response.data.message || "Something went wrong while updating portfolio");
   }
 
   toast.dismiss(toastId);
@@ -471,7 +508,7 @@ export const deployPortfolio = async (portfolioData, token) => {
     result = response?.data;
   } catch (error) {
     console.error("DEPLOY_PORTFOLIO_API ERROR:", error);
-    toast.error(error.response.data.message|| "Something went wrong while deploying the portfolio.");
+    toast.error(error.response.data.message || "Something went wrong while deploying the portfolio.");
   }
   toast.dismiss(toastId);
   return result
@@ -596,7 +633,7 @@ export const updateEmailNotificationStatus = async (portfolioId, token) => {
   const toastId = toast.loading("Updating preferences...");
 
   try {
-    const response = await apiConnector("POST", TOGGLE_EMAIL_NOTIFICATION, {portfolioId}, {
+    const response = await apiConnector("POST", TOGGLE_EMAIL_NOTIFICATION, { portfolioId }, {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     });

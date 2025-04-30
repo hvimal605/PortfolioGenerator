@@ -213,3 +213,24 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   border-radius: 50%;
 }
 
+
+@keyframes bounceDelay {
+  0%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-8px);
+  }
+}
+.bounce-delay-1 {
+  animation: bounceDelay 1.2s infinite;
+  animation-delay: 0s;
+}
+.bounce-delay-2 {
+  animation: bounceDelay 1.2s infinite;
+  animation-delay: 0.2s;
+}
+.bounce-delay-3 {
+  animation: bounceDelay 1.2s infinite;
+  animation-delay: 0.4s;
+}
