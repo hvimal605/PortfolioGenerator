@@ -42,7 +42,8 @@ app.use(cors({
       if (
         origin.endsWith(".vercel.app") ||
         origin.endsWith(".netlify.app") ||
-        origin.includes("your-custom-domain.com")
+        origin.endsWith(".netlify.app") ||
+        origin.includes("https://portfolioshub.in")
       ) {
         return callback(null, true);
       }
