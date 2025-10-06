@@ -134,7 +134,7 @@ const checkNetlifySiteAvailability = async (slug) => {
 
  
 const waitForSiteReady = async (deployId, siteUrl) => {
-    const maxAttempts = 8;
+    const maxAttempts = 12;
     let attempts = 0;
 
     console.log(` Waiting for deployment to be ready...`);
