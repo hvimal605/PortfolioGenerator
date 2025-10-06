@@ -186,118 +186,101 @@ const waitForSiteReady = async (deployId, siteUrl) => {
 
 
 exports.deployPortfolio = async (req, res) => {
-    try {
-        const { templateId, PortfolioId } = req.body;
-        const userId = req.user.id;
+  try {
+    const { templateId, PortfolioId } = req.body;
+    const userId = req.user.id;
 
-        if (!templateId || !PortfolioId) {
-            return res.status(400).json({ message: "templateId and PortfolioId are required." });
-        }
+    if (!templateId || !PortfolioId)
+      return res.status(400).json({ message: "templateId and PortfolioId are required." });
 
-        // Fetch template details
-        const template = await Template.findById(templateId);
-        if (!template || !template.TemplateLink) {
-            return res.status(404).json({ message: "Template not found or missing TemplateLink." });
-        }
+    // Fetch portfolio & template
+    const portfolio = await Portfolio.findById(PortfolioId);
+    const template = await Template.findById(templateId);
 
-        const TemplateLink = template.TemplateLink;
+    if (!portfolio || !template || !template.TemplateLink)
+      return res.status(404).json({ message: "Portfolio or template not found." });
 
-        // Fetch portfolio
-        let portfolio = await Portfolio.findById(PortfolioId);
-        if (!portfolio) {
-            return res.status(404).json({ message: "Portfolio not found." });
-        }
+    // Generate unique slug immediately
+    let slug = portfolio.slug;
+    if (!(await checkNetlifySiteAvailability(slug))) {
+      const baseSlug = slug.replace(/-\w{4}$/, "").replace(/-+$/, "");
+      slug = `${baseSlug}-${nanoid(4)}`;
+    }
 
-        let { slug } = portfolio;
+    // **Step 1: Update portfolio status as deploying**
+    await Portfolio.findByIdAndUpdate(PortfolioId, { slug, deployStatus: "deploying" });
 
-        // Step 1: Check if slug is available
-        if (!(await checkNetlifySiteAvailability(slug))) {
-            const baseSlug = slug.replace(/-\w{4}$/, "").replace(/-+$/, "");
-            let uniqueSlug = `${baseSlug}-${nanoid(4)}`;
+    // **Step 2: Immediately respond to frontend**
+    res.status(200).json({
+      success: true,
+      message: "Deployment started. This may take a while.",
+      slug,
+    });
 
-            while (!(await checkNetlifySiteAvailability(uniqueSlug))) {
-                uniqueSlug = `${baseSlug}-${nanoid(4)}`;
-            }
-            slug = uniqueSlug;
-        }
-
-        // Step 2: Create new Netlify site
+    // **Step 3: Background deployment**
+    setImmediate(async () => {
+      try {
+        // Create Netlify site
         const createSiteResponse = await axios.post(
-            "https://api.netlify.com/api/v1/sites",
-            { name: slug },
-            {
-                headers: {
-                    Authorization: `Bearer ${process.env.NETLIFY_ACCESS_TOKEN}`,
-                },
-            }
+          "https://api.netlify.com/api/v1/sites",
+          { name: slug },
+          { headers: { Authorization: `Bearer ${process.env.NETLIFY_ACCESS_TOKEN}` } }
         );
 
         const siteId = createSiteResponse.data.id;
-        let netlifySiteUrl = createSiteResponse.data.url;
+        let netlifySiteUrl = createSiteResponse.data.url.replace("http://", "https://");
 
-        if (netlifySiteUrl && netlifySiteUrl.startsWith("http://")) {
-            netlifySiteUrl = netlifySiteUrl.replace("http://", "https://");
-        }
-
-        // Step 3: Stream download from Cloudinary and deploy to Netlify
+        // Stream from Cloudinary → Netlify deploy
         const cloudinaryStream = await axios({
-            method: 'get',
-            url: TemplateLink,
-            responseType: 'stream',
+          method: "get",
+          url: template.TemplateLink,
+          responseType: "stream",
         });
 
         const deployResponse = await axios.post(
-            `https://api.netlify.com/api/v1/sites/${siteId}/deploys`,
-            cloudinaryStream.data,
-            {
-                headers: {
-                    Authorization: `Bearer ${process.env.NETLIFY_ACCESS_TOKEN}`,
-                    "Content-Type": "application/zip",
-                },
-            }
+          `https://api.netlify.com/api/v1/sites/${siteId}/deploys`,
+          cloudinaryStream.data,
+          {
+            headers: {
+              Authorization: `Bearer ${process.env.NETLIFY_ACCESS_TOKEN}`,
+              "Content-Type": "application/zip",
+            },
+          }
         );
 
         const deployId = deployResponse.data.id;
 
-        // Step 4: Wait for deployment to be ready
-        await waitForSiteReady(deployId ,netlifySiteUrl);
+        // Wait for site to be ready
+        await waitForSiteReady(deployId, netlifySiteUrl);
 
-        // Step 5: Update Portfolio with deployLink and slug
-        portfolio = await Portfolio.findByIdAndUpdate(
-            PortfolioId,
-            { deployLink: netlifySiteUrl, slug },
-            { new: true }
+        // Update portfolio deploy link & status
+        await Portfolio.findByIdAndUpdate(
+          PortfolioId,
+          { deployLink: netlifySiteUrl, deployStatus: "ready" }
         );
 
-        // Step 6: Send deployment email
+        // Send mail
         const user = await User.findById(userId);
-        const userName = user.firstName + " " + user.lastName;
-        const userEmail = user.email;
-
         await mailSender(
-            userEmail,
-            `Successfully Deployed the Portfolio`,
-            portfolioDeployedTemplate(userName, netlifySiteUrl)
+          user.email,
+          "Portfolio Deployed Successfully!",
+          portfolioDeployedTemplate(user.firstName + " " + user.lastName, netlifySiteUrl)
         );
 
-        // Step 7: Update Template usage
-        await Template.findByIdAndUpdate(
-            templateId,
-            { $addToSet: { usage: userId } }
-        );
+        // Update template usage
+        await Template.findByIdAndUpdate(templateId, { $addToSet: { usage: userId } });
+      } catch (error) {
+        console.error("Background deployment failed:", error);
+        await Portfolio.findByIdAndUpdate(PortfolioId, { deployStatus: "failed" });
+      }
+    });
 
-        return res.status(200).json({
-            success: true,
-            message: "Portfolio deployed successfully!",
-            deployLink: netlifySiteUrl,
-            newSlug: slug,
-        });
-
-    } catch (error) {
-        console.error(error);
-        return res.status(500).json({ message: "Deployment failed", error });
-    }
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Deployment request failed", error });
+  }
 };
+
 
 
 
