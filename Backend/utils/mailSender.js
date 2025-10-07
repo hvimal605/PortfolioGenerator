@@ -43,7 +43,7 @@ const mailSender = async (email, subject, htmlBody) => {
     const resp = await axios.post(
       "https://api.brevo.com/v3/smtp/email",
       {
-        sender: { name: "Portfolio Hub", email: "noreply@portfolioshub.in" },
+        sender: { name: "PortfolioCraft", email: "noreply@portfolioshub.in" },
         to: [{ email }],
         subject,
         htmlContent: htmlBody,
