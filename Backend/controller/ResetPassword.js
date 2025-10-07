@@ -33,7 +33,7 @@ exports.resetPasswordToken = async (req, res) => {
             },
             { new: true })
         //create url
-        const url = `https://theportfoliogenerator.netlify.app/update-password/${token}`
+        const url = `https://portfolioshub.in/update-password/${token}`
         //send mail conataining the url
         await mailSender(email, 'Password Reset Link', passwordResetTemplate(url))
 

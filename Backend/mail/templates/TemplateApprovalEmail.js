@@ -123,7 +123,7 @@ const templateApprovedMail = (name, templateName) => {
         <p>Your template <span class="template-name">${templateName}</span> has been <strong>approved</strong> and is now officially <span style="color:#00f6ff;font-weight:bold;">LIVE</span> on our platform! 🚀</p>
         <p class="highlighted-msg">Users across the world can now build stunning portfolios with your creation. You're not just a dev now... you're a creator! 💥</p>
       </div>
-      <a href="http://localhost:5173/developerDas" class="cta-button" target="_blank">⚡ Go to Your Dashboard</a>
+      <a href="https://portfolioshub.in/developerDas" class="cta-button" target="_blank">⚡ Go to Your Dashboard</a>
       <div class="message" style="margin-top: 30px;">
         Track usage, feedback, and watch your template rise to fame!<br />You earned this, now own it! 💼🔥
       </div>

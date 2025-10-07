@@ -101,7 +101,7 @@ const templateRejectedMail = (name, templateName) => {
           Reasons may include missing responsiveness, design issues, or not following the structure/instruction formats mentioned in our documentation.
         </p>
       </div>
-      <a href="http://localhost:5173/developerDas" class="cta-button" target="_blank">🔁 Revise & Re-submit</a>
+      <a href="https://portfolioshub.in/developerDas" class="cta-button" target="_blank">🔁 Revise & Re-submit</a>
       <div class="message" style="margin-top: 30px;">
         Don't worry — mistakes are stepping stones!<br />
         You can revise your template and resubmit it for review anytime. We're rooting for you! 🚀

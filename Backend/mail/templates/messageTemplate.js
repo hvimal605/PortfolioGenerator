@@ -137,7 +137,7 @@ const messageTemplate = (senderName, subject, message, email, userName, link) =>
         <div class="label">💬 Message:</div>
         <div class="value">Click below to check the message on your dashboard 👇</div>
         <div style="text-align: center;">
-          <a class="btn" href="https://theportfoliogenerator.netlify.app/UserDas" target="_blank">Go to Dashboard</a>
+          <a class="btn" href="https://portfolioshub.in/UserDas" target="_blank">Go to Dashboard</a>
         </div>
       </div>
 
