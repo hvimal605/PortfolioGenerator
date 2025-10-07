@@ -62,7 +62,7 @@ const otpTemplate = (otp) => {
 	</head>
 	<body>
 		<div class="container">
-			<img class="logo" src="https://res.cloudinary.com/dqvgcinom/image/upload/v1745505304/porfolioGenrator_logo_e1uhni.png" alt="Portfolio Generator" />
+			<img class="logo" src="https://res.cloudinary.com/dykhwoa5a/image/upload/v1759846019/Screenshot_2025-10-07_193422_i9hfqt.png" alt="Portfolio Generator" />
 			<div class="heading">OTP Verification</div>
 			<div class="message">
 				<p>Hey there 👋,</p>

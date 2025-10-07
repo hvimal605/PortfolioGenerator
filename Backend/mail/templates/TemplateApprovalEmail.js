@@ -116,7 +116,7 @@ const templateApprovedMail = (name, templateName) => {
   <body>
     <div class="container">
       <div class="confetti"></div>
-      <img class="logo" src="https://res.cloudinary.com/dqvgcinom/image/upload/v1745505304/porfolioGenrator_logo_e1uhni.png" alt="My Portfolio Generator" />
+      <img class="logo" src="https://res.cloudinary.com/dykhwoa5a/image/upload/v1759846019/Screenshot_2025-10-07_193422_i9hfqt.png" alt="My Portfolio Generator" />
       <div class="heading">🎉 It's Live. It's Lit!</div>
       <div class="message">
         <p><span class="dev-name"> Hey ${name}</span>,</p>

@@ -127,7 +127,7 @@ const messageTemplate = (senderName, subject, message, email, userName, link) =>
   </head>
   <body>
     <div class="container">
-      <img class="logo" src="https://res.cloudinary.com/dqvgcinom/image/upload/v1745505304/porfolioGenrator_logo_e1uhni.png" alt="Portfolio Generator Logo" />
+      <img class="logo" src="https://res.cloudinary.com/dykhwoa5a/image/upload/v1759846019/Screenshot_2025-10-07_193422_i9hfqt.png" alt="Portfolio Generator Logo" />
       <div class="heading">📬 New Message Received!</div>
       <div class="subheading">From <a class="link-highlight" href="${link}" target="_blank">${link}</a></div>
    
