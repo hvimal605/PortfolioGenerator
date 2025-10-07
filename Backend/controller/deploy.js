@@ -274,11 +274,11 @@ exports.deployPortfolio = async (req, res) => {
         const userName = user.firstName + " " + user.lastName;
         const userEmail = user.email;
 
-        // await mailSender(
-        //     userEmail,
-        //     `Successfully Deployed the Portfolio`,
-        //     portfolioDeployedTemplate(userName, netlifySiteUrl)
-        // );
+        await mailSender(
+            userEmail,
+            `Successfully Deployed the Portfolio`,
+            portfolioDeployedTemplate(userName, netlifySiteUrl)
+        );
 
         // Step 7: Update Template usage
         await Template.findByIdAndUpdate(
