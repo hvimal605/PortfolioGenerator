@@ -1,20 +1,20 @@
-# PortfolioGen — Build & Deploy Your Personal Portfolio in Minutes! 🚀
+# PortfolioCraft — Build & Deploy Your Personal Portfolio in Minutes! 🚀
 
 PortfolioGen is an intuitive platform designed to help you create and deploy your personal portfolio website in no time — without writing a single line of code! 🌟
 
 ## Live Demo:
-[Try PortfolioGen Now](https://theportfoliogenerator.netlify.app/)
+[Try PortfolioCraft Now](https://portfolioshub.in/)
 
 ## Table of Contents:
-- [What is PortfolioGen?](#what-is-portfoliogen)
+- [What is PortfolioCraft?](#what-is-portfoliogen)
 - [How It Works](#how-it-works)
 - [Key Features](#key-features)
 - [For Developers](#for-developers)
 - [Technologies Used](#technologies-used)
 - [What's Coming Next](#whats-coming-next)
 
-## What is PortfolioGen?
-PortfolioGen allows users to quickly create and deploy a personalized portfolio website using professionally designed templates. No coding skills required! Simply sign up, personalize your portfolio, and deploy it to a live URL in just a few clicks.
+## What is PortfolioCraft?
+PortfolioCraft allows users to quickly create and deploy a personalized portfolio website using professionally designed templates. No coding skills required! Simply sign up, personalize your portfolio, and deploy it to a live URL in just a few clicks.
 
 ## How It Works:
 1. **Sign Up in Seconds**: Quick and easy registration process.
