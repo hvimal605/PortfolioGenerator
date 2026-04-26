@@ -1,7 +1,10 @@
 const mongoose = require("mongoose")
 
 const projectSchema = new mongoose.Schema({
-    title: String,
+    title: {
+        type: String,
+        index: true,
+    },
     description: String,
     gitRepoLink: String,
     projectLink: String,
@@ -11,13 +14,25 @@ const projectSchema = new mongoose.Schema({
     projectBanner: {
         public_id: {
             type: String,
-            required: true,
+            required: false,
         },
         url: {
             type: String,
-            required: true,
+            required: false,
         },
     },
+    projectBanners: [
+        {
+            public_id: {
+                type: String,
+                required: true,
+            },
+            url: {
+                type: String,
+                required: true,
+            },
+        }
+    ],
 });
 
 module.exports = mongoose.model("Project", projectSchema);

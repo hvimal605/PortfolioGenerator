@@ -4,17 +4,19 @@ import UploadTemplate from '../components/core/Developer/UploadTemplate';
 
 const DeveloperUpload = () => {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r  p-0 md:p-8">
-      <div className="w-full max-w-6xl flex flex-col lg:flex-row gap-6">
-        {/* Instructions on the left */}
-        <div className="w-full lg:w-1/2 mt-4">
+    <div className="w-full h-full pb-20 pt-10 px-6">
+      <div className="w-full max-w-[1400px] mx-auto flex flex-col lg:flex-row gap-12 items-start">
+        
+        {/* Instructions on the Left (50%) */}
+        <div className="w-full lg:w-1/2">
           <Instructions />
         </div>
         
-        {/* UploadTemplate on the right */}
-        <div className="w-full lg:w-1/2 mt-5">
+        {/* Upload Form on the Right (50%) */}
+        <div className="w-full lg:w-1/2">
           <UploadTemplate />
         </div>
+        
       </div>
     </div>
   );

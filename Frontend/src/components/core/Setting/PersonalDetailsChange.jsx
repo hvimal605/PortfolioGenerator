@@ -23,15 +23,17 @@ const PersonalDetailsChange = () => {
   }
 
   return (
-    <div className="w-full bg-[#111111]/70 border border-white/10 backdrop-blur-md rounded-2xl shadow-[0_0_30px_#00000088] px-6 py-8 sm:px-10 sm:py-12 transition-all duration-300">
-      <h3 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-violet-500 mb-6">
-        Edit Personal Details
-      </h3>
+    <div className="bg-[#0a0a0a]/80 backdrop-blur-xl border border-white/5 rounded-[2rem] p-8 shadow-[0_8px_30px_rgba(0,0,0,0.4)] relative group overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none rounded-[2rem]" />
+      
+      <div className="relative z-10 w-full">
+        <h3 className="text-xl font-bold text-white mb-6 tracking-wide">
+          Personal Information
+        </h3>
 
-      <div className="grid gap-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-400 mb-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-bold tracking-wider text-neutral-500 uppercase ml-1">
               First Name
             </label>
             <input
@@ -39,12 +41,12 @@ const PersonalDetailsChange = () => {
               name="firstName"
               value={formData.firstName}
               onChange={handleChange}
-              placeholder="First name"
-              className="w-full bg-black/40 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-pink-500"
+              placeholder="e.g. Jane"
+              className="w-full bg-[#111] border border-white/10 rounded-xl px-5 py-3.5 text-white placeholder-neutral-600 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all font-medium"
             />
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-400 mb-2">
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-bold tracking-wider text-neutral-500 uppercase ml-1">
               Last Name
             </label>
             <input
@@ -52,34 +54,34 @@ const PersonalDetailsChange = () => {
               name="lastName"
               value={formData.lastName}
               onChange={handleChange}
-              placeholder="Last name"
-              className="w-full bg-black/40 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-pink-500"
+              placeholder="e.g. Doe"
+              className="w-full bg-[#111] border border-white/10 rounded-xl px-5 py-3.5 text-white placeholder-neutral-600 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all font-medium"
             />
           </div>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-400 mb-2">
-            About
+        <div className="flex flex-col gap-1.5 mb-8">
+          <label className="text-xs font-bold tracking-wider text-neutral-500 uppercase ml-1">
+            Bio / About
           </label>
           <textarea
             name="about"
             value={formData.about}
             onChange={handleChange}
             rows="4"
-            placeholder="Tell the world about your superpowers..."
-            className="w-full bg-black/40 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-pink-500 resize-none"
+            placeholder="A brief description of who you are..."
+            className="w-full bg-[#111] border border-white/10 rounded-xl px-5 py-3.5 text-white placeholder-neutral-600 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all font-medium resize-none custom-scrollbar"
           />
         </div>
-      </div>
 
-      <div className="flex justify-end">
-        <button
-          onClick={handleSubmit}
-          className="mt-8 bg-gradient-to-r from-pink-600 to-purple-600 px-8 py-3 rounded-xl text-white font-semibold hover:shadow-[0_0_20px_#ec4899aa] transition-all duration-300"
-        >
-          Save Profile
-        </button>
+        <div className="flex justify-end pt-6 border-t border-white/[0.05]">
+          <button
+            onClick={handleSubmit}
+            className="px-8 py-3 bg-white/10 hover:bg-cyan-500 hover:text-black border border-white/5 text-white font-bold rounded-xl transition-all duration-300 shadow-[inset_0_1px_0_rgba(255,255,255,0.2)] hover:shadow-[0_0_20px_rgba(34,211,238,0.4)]"
+          >
+            Save Changes
+          </button>
+        </div>
       </div>
     </div>
   )

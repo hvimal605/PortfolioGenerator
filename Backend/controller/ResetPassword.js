@@ -28,7 +28,7 @@ exports.resetPasswordToken = async (req, res) => {
         //update user by adding token and expiration time
         const updatedDetails = await User.findOneAndUpdate({ email: email },
             {
-                token: token,
+                resetPasswordToken: token,
                 resetPasswordExpires: Date.now() + 15 * 60 * 1000
             },
             { new: true })
@@ -74,7 +74,7 @@ exports.resetPassword = async (req, res) => {
             });
         }
         //get userdetails from db using token
-        const userDetails = await User.findOne({ token: token });
+        const userDetails = await User.findOne({ resetPasswordToken: token });
 
         //if no entry -invalid token
         if (!userDetails) {
@@ -97,8 +97,12 @@ exports.resetPassword = async (req, res) => {
         //hash pwd
         const hashedPassword = await bcrypt.hash(password, 10);
         //password update
-        await User.findOneAndUpdate({ token: token },
-            { password: hashedPassword },
+        await User.findOneAndUpdate({ resetPasswordToken: token },
+            { 
+              password: hashedPassword,
+              resetPasswordToken: undefined,
+              resetPasswordExpires: undefined
+            },
             { new: true },)
 
         //return response

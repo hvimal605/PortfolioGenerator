@@ -5,6 +5,7 @@ import {
   reviewTemplateRequest,
 } from "../../../services/operations/TemplateApi";
 import TemplateReqCard from "./TemplateReqCard";
+import { motion, AnimatePresence } from "framer-motion";
 
 const TemplateRequests = () => {
   const [templates, setTemplates] = useState([]);
@@ -15,16 +16,13 @@ const TemplateRequests = () => {
     const fetchTemplates = async () => {
       try {
         const res = await getAllRequestedTemplates(token);
-        if (Array.isArray(res)) {
+        if (res && Array.isArray(res)) {
           setTemplates(res);
-        } else {
-          console.warn("Unexpected response:", res);
         }
       } catch (err) {
         console.error("Failed to fetch templates", err);
       }
     };
-
     fetchTemplates();
   }, [token]);
 
@@ -45,82 +43,83 @@ const TemplateRequests = () => {
     }
   };
 
+  const filterOptions = ["All", "Pending", "Approved", "Rejected"];
+
   const filteredTemplates =
     filter === "All"
       ? templates
       : templates.filter((t) => t.status === filter);
 
   return (
-    <div className="p-6 bg-black text-white">
-      {/* Heading */}
-      <div className="mb-8 text-center">
-        <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 text-transparent bg-clip-text">
-          Template Review Requests
-        </h1>
-        <div className="mt-2 h-[2px] w-24 mx-auto bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-full animate-pulse"></div>
+    <div className="flex flex-col gap-10">
+      
+      {/* Header Area */}
+      <div className="flex flex-col gap-2">
+         <h2 className="text-4xl font-black tracking-tighter text-white">
+           Review <span className="text-white/40">Submissions</span>
+         </h2>
+         <p className="text-zinc-500 font-medium text-sm italic">
+           Approve or reject developer builds for the platform library.
+         </p>
       </div>
 
-      {/* Filter Dropdown */}
-      <div className="mb-8 flex justify-center">
-  <div className="relative w-64">
-    <select
-      value={filter}
-      onChange={(e) => setFilter(e.target.value)}
-      className="w-full appearance-none bg-gray-900 text-white px-5 py-3 pr-10 rounded-xl border border-gray-700 shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300 text-base"
-    >
-      <option value="All">🌐 All</option>
-      <option value="Pending">⏳ Pending</option>
-      <option value="Approved">✅ Approved</option>
-      <option value="Rejected">❌ Rejected</option>
-    </select>
-
-    {/* Down Arrow Icon */}
-    <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
-      <svg
-        className="w-5 h-5 text-gray-400"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        viewBox="0 0 24 24"
-      >
-        <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-      </svg>
-    </div>
-  </div>
-</div>
-
-
-      {/* Filter Title */}
-      {filter !== "All" && (
-        <h2 className="text-center text-lg text-gray-300 mb-4">
-          Showing <span className="text-white font-semibold">{filter}</span> Templates
-        </h2>
-      )}
-
-      {/* Content */}
-      {filteredTemplates.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {filteredTemplates.map((template, index) => (
-            <div
-              key={template._id}
-              className="animate-fade-in"
-              style={{ animationDelay: `${index * 0.1}s` }}
+      {/* Pill-based Navigation Filter */}
+      <div className="flex flex-wrap items-center gap-4 border-b border-white/5 pb-8 overflow-x-auto scrollbar-none">
+         {filterOptions.map((option) => (
+            <button
+               key={option}
+               onClick={() => setFilter(option)}
+               className={`relative h-11 px-8 rounded-full font-bold text-xs uppercase tracking-[0.2em] transition-all duration-300
+                  ${filter === option 
+                    ? "text-white" 
+                    : "text-zinc-500 hover:text-white"}`}
             >
-              <TemplateReqCard
-                template={template}
-                onStatusChange={handleStatusChange}
-              />
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div className="text-center text-gray-400 mt-20">
-          <p className="text-lg">No {filter !== "All" ? filter.toLowerCase() : ""} template requests found 👀</p>
-          <p className="text-sm mt-2">
-            Once developers submit templates, you’ll see them here.
-          </p>
-        </div>
-      )}
+               <span className="relative z-10">{option}</span>
+               {filter === option && (
+                  <motion.div 
+                     layoutId="filter-pill"
+                     className="absolute inset-0 bg-white/5 border border-white/10 rounded-full shadow-[0_4px_20px_rgba(0,0,0,0.5)]"
+                  />
+               )}
+            </button>
+         ))}
+      </div>
+
+      {/* Content Section */}
+      <div className="min-h-[400px]">
+         <AnimatePresence mode="wait">
+            {filteredTemplates.length > 0 ? (
+               <motion.div 
+                  key={filter}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="grid grid-cols-1 md:grid-cols-2 gap-8"
+               >
+                  {filteredTemplates.map((template) => (
+                     <TemplateReqCard
+                        key={template._id}
+                        template={template}
+                        onStatusChange={handleStatusChange}
+                     />
+                  ))}
+               </motion.div>
+            ) : (
+               <motion.div 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="flex flex-col items-center justify-center py-32 text-center"
+               >
+                  <div className="w-16 h-16 rounded-full bg-white/5 border border-white/10 flex items-center justify-center mb-6">
+                     <span className="text-2xl text-zinc-600">👀</span>
+                  </div>
+                  <h3 className="text-white font-black text-lg tracking-tight">No submissions found</h3>
+                  <p className="text-zinc-500 text-sm italic mt-1">There are currently no {filter.toLowerCase()} requests queueing.</p>
+               </motion.div>
+            )}
+         </AnimatePresence>
+      </div>
+
     </div>
   );
 };

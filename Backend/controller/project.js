@@ -7,46 +7,54 @@ const Portfolio = require('../models/Portfolio');
 exports.addNewProject = async (req, res) => {
     try {
 
-        if (!req.files || !req.files.projectBanner) {
+        if (!req.files || (!req.files.projectBanner && !req.files.projectBanners)) {
             return res.status(400).json({
                 success: false,
-                message: "Project Banner Image Required!"
+                message: "At least one Project Image is required!"
             });
         }
 
-        const { projectBanner } = req.files;
+        // Handle both legacy "projectBanner" and new "projectBanners" array
+        let bannersInput = [];
+        if (req.files.projectBanners) {
+            bannersInput = Array.isArray(req.files.projectBanners)
+                ? req.files.projectBanners
+                : [req.files.projectBanners];
+        } else if (req.files.projectBanner) {
+            bannersInput = [req.files.projectBanner];
+        }
+
         const {
             title,
             description,
             gitRepoLink,
             projectLink,
-
             technologies,
             deployed,
             portfolioId
-
         } = req.body;
 
-
-        if (
-            !title ||
-            !description ||
-            !gitRepoLink ||
-         
-
-            !technologies
-        ) {
+        if (!title || !description || !gitRepoLink || !technologies) {
             return res.status(400).json({
                 success: false,
                 message: "Please fill all the details!"
             });
         }
 
-        const image = await uploadImageToCloudinary(
-            projectBanner,
-            process.env.FOLDER_NAME,
-            1000,
-            100
+        // Upload all banners
+        const uploadedImages = await Promise.all(
+            bannersInput.map(async (banner) => {
+                const image = await uploadImageToCloudinary(
+                    banner,
+                    process.env.FOLDER_NAME,
+                    1000,
+                    1000
+                );
+                return {
+                    public_id: image.public_id,
+                    url: image.secure_url,
+                };
+            })
         );
 
         // Create a new project with the provided details
@@ -55,13 +63,10 @@ exports.addNewProject = async (req, res) => {
             description,
             gitRepoLink,
             projectLink,
-
             technologies,
             deployed,
-            projectBanner: {
-                public_id: image.public_id,
-                url: image.secure_url,
-            },
+            projectBanner: uploadedImages[0], // Legacy support fallback
+            projectBanners: uploadedImages,
         });
 
         const portfolio = await Portfolio.findByIdAndUpdate(
@@ -108,10 +113,20 @@ exports.deleteProject = async (req, res) => {
             });
         }
 
-        // Delete the project banner from Cloudinary (only if exists)
-        const projectImageId = projectRes.projectBanner?.public_id;
-        if (projectImageId) {
-            await cloudinary.uploader.destroy(projectImageId);
+        // Delete the project banner(s) from Cloudinary
+        const imagesToDelete = [];
+        if (projectRes.projectBanners && projectRes.projectBanners.length > 0) {
+            projectRes.projectBanners.forEach(img => {
+                if (img.public_id) imagesToDelete.push(img.public_id);
+            });
+        } else if (projectRes.projectBanner && projectRes.projectBanner.public_id) {
+            imagesToDelete.push(projectRes.projectBanner.public_id);
+        }
+
+        // Deduplicate and destroy safely
+        const uniqueImageIds = [...new Set(imagesToDelete)];
+        if (uniqueImageIds.length > 0) {
+            await Promise.all(uniqueImageIds.map(id => cloudinary.uploader.destroy(id)));
         }
 
         // Delete the project document
@@ -150,31 +165,90 @@ exports.upadteProject = async (req, res) => {
             projectLink: req.body.projectLink,
             gitRepoLink: req.body.gitRepoLink,
         };
-        const { projectId } = req.body
+        const { projectId, retainedBanners } = req.body
         if (!projectId) {
             return res.status(400).json({
-                success: true,
-                message: "Please give project id.",
-
+                success: false,
+                message: "Please provide project id.",
             });
         }
-        if (req.files && req.files.projectBanner) {
-            const projectBanner = req.files.projectBanner;
-            const projectRes = await project.findById(projectId);
-            const projectImageId = projectRes.projectBanner.public_id;
-            await cloudinary.uploader.destroy(projectImageId);
-            const newProjectImage = await uploadImageToCloudinary(
-                projectBanner,
-                process.env.FOLDER_NAME,
-                1000,
-                1000
-            );
-            newProjectData.projectBanner = {
-                public_id: newProjectImage.public_id,
-                url: newProjectImage.secure_url,
-            };
+
+        const projectRes = await project.findById(projectId);
+        if (!projectRes) {
+            return res.status(404).json({
+                success: false,
+                message: "Project not found",
+            });
         }
-        const projectRes = await project.findByIdAndUpdate(
+
+        // Process existing banners: Identify which ones to keep vs delete
+        let keptBanners = [];
+        if (retainedBanners) {
+            try {
+                keptBanners = JSON.parse(retainedBanners);
+            } catch (e) {
+                console.error("Failed to parse retainedBanners:", e);
+                keptBanners = projectRes.projectBanners || [];
+            }
+        } else {
+            // Fallback for old clients: keep all if no new files, otherwise follow old logic (replace all)
+            if (req.files && (req.files.projectBanner || req.files.projectBanners)) {
+                keptBanners = []; // Old behavior: replace all if new ones provided
+            } else {
+                keptBanners = projectRes.projectBanners || [];
+            }
+        }
+
+        // Identify images to delete from Cloudinary
+        const existingIds = (projectRes.projectBanners || []).map(b => b.public_id);
+        const keptIds = keptBanners.map(b => b.public_id);
+        const idsToDelete = existingIds.filter(id => id && !keptIds.includes(id));
+
+        if (idsToDelete.length > 0) {
+            await Promise.all(idsToDelete.map(id => cloudinary.uploader.destroy(id)));
+        }
+
+        // Prepare new images
+        let newUploadedBanners = [];
+        if (req.files && (req.files.projectBanner || req.files.projectBanners)) {
+            let bannersInput = [];
+            if (req.files.projectBanners) {
+                bannersInput = Array.isArray(req.files.projectBanners) 
+                    ? req.files.projectBanners 
+                    : [req.files.projectBanners];
+            } else if (req.files.projectBanner) {
+                bannersInput = [req.files.projectBanner];
+            }
+
+            newUploadedBanners = await Promise.all(
+                bannersInput.map(async (banner) => {
+                    const image = await uploadImageToCloudinary(
+                        banner,
+                        process.env.FOLDER_NAME,
+                        1000,
+                        1000
+                    );
+                    return {
+                        public_id: image.public_id,
+                        url: image.secure_url,
+                    };
+                })
+            );
+        }
+
+        const finalBanners = [...keptBanners, ...newUploadedBanners];
+        
+        if (finalBanners.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Maintenance Violation: At least one visual asset is mandatory for deployment."
+            });
+        }
+
+        newProjectData.projectBanner = finalBanners[0];
+        newProjectData.projectBanners = finalBanners;
+
+        const updatedProject = await project.findByIdAndUpdate(
             projectId,
             newProjectData,
             {
@@ -183,10 +257,11 @@ exports.upadteProject = async (req, res) => {
                 useFindAndModify: false,
             }
         );
+
         res.status(200).json({
             success: true,
-            message: "Project Updated!",
-            projectRes,
+            message: "Intelligence Hub Updated Successfully!",
+            projectRes: updatedProject,
         });
 
     } catch (error) {
@@ -242,7 +317,7 @@ exports.getSingleProject = async (req, res) => {
         console.error(error);
         return res.status(500).json({
             success: false,
-            message: 'Something went wrong while get single Project'
+            message: 'Internal Server Error. Failed to fetch project details'
         });
     }
 };

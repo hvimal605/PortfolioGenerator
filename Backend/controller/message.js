@@ -1,4 +1,6 @@
+const redeployTemplate = require('../mail/templates/CustumerReply');
 const messageTemplate = require('../mail/templates/messageTemplate');
+const reminderTemplate = require('../mail/templates/ReminderTemplate');
 const Message = require('../models/message')
 
 const Portfolio = require('../models/Portfolio');
@@ -132,3 +134,35 @@ exports.toggleEmailNotifications = async (req, res) => {
         res.status(500).json({ success: false, message: "Server error." });
     }
 };
+
+
+exports.sendMessageToCustomer = async (req, res) => {
+    try {
+        const { username, userEmail, subject } = req.body;
+
+        // Validation
+        if (!username || !userEmail || !subject) {
+            return res.status(400).json({ success: false, message: "All fields are required!" });
+        }
+
+        
+        // Send Email
+        await mailSender(
+            userEmail,
+            subject,
+           redeployTemplate(username)
+        );
+
+        // Respond
+        res.status(200).json({
+            success: true,
+            message: "Message sent to customer!",
+        });
+
+    } catch (err) {
+        console.error("Send Message To Customer Error:", err);
+        res.status(500).json({ success: false, message: "Server error while sending message." });
+    }
+};
+
+

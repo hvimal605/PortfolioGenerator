@@ -8,6 +8,7 @@ import {
   Title,
   Tooltip,
   Legend,
+  Filler
 } from "chart.js";
 import { Line } from "react-chartjs-2";
 
@@ -19,7 +20,8 @@ ChartJS.register(
   PointElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
+  Filler
 );
 
 const PerformanceGraph = ({ data }) => {
@@ -30,11 +32,7 @@ const PerformanceGraph = ({ data }) => {
   const values = filteredData.map((item) => item.count);
 
   return (
-    <div className="bg-[#1a1a1a] p-6 border border-[#4ade80] rounded-2xl shadow-2xl hover:shadow-[#4ade80]/50 transition-all duration-300">
-      <h2 className="text-2xl font-semibold text-[#e2e8f0] mb-4">
-        📈 Performance in Current Year ({new Date().getFullYear()})
-      </h2>
-
+    <div className="w-full h-full pb-2">
       <Line
         data={{
           labels,
@@ -42,43 +40,78 @@ const PerformanceGraph = ({ data }) => {
             {
               label: "Templates Created",
               data: values,
-              borderColor: "#4ade80",
-              backgroundColor: "rgba(74, 222, 128, 0.2)",
-              pointBackgroundColor: "#4ade80",
-              pointBorderColor: "#ffffff",
+              borderColor: "#3b82f6", // tailwind blue-500
+              backgroundColor: (context) => {
+                const ctx = context.chart.ctx;
+                const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+                gradient.addColorStop(0, "rgba(59, 130, 246, 0.4)");
+                gradient.addColorStop(1, "rgba(59, 130, 246, 0.0)");
+                return gradient;
+              },
+              pointBackgroundColor: "#0A0A0A",
+              pointBorderColor: "#3b82f6",
+              pointBorderWidth: 2,
+              pointRadius: 4,
+              pointHoverRadius: 6,
+              pointHoverBackgroundColor: "#3b82f6",
+              pointHoverBorderColor: "#ffffff",
               fill: true,
-              borderWidth: 2,
-              tension: 0.4,
+              borderWidth: 3,
+              tension: 0.4, // smooth bezier curve
             },
           ],
         }}
         options={{
           responsive: true,
+          maintainAspectRatio: false,
           plugins: {
             legend: { display: false },
             tooltip: {
-              backgroundColor: "rgba(20, 20, 20, 0.9)",
-              titleColor: "#4ade80",
-              bodyColor: "#e2e8f0",
-              borderColor: "#4ade80",
+              backgroundColor: "rgba(10, 10, 10, 0.9)",
+              titleColor: "#ffffff",
+              bodyColor: "#a1a1aa", // zinc-400
+              titleFont: { size: 13, weight: 'bold', family: 'Inter' },
+              bodyFont: { size: 12, font: 'Inter' },
+              padding: 12,
+              borderColor: "rgba(255, 255, 255, 0.1)",
               borderWidth: 1,
+              displayColors: false,
+              callbacks: {
+                label: function(context) {
+                  return `Units: ${context.parsed.y}`;
+                }
+              }
             },
           },
           scales: {
             y: {
               beginAtZero: true,
-              grid: { color: "rgba(255, 255, 255, 0.1)" },
+              grid: { 
+                color: "rgba(255, 255, 255, 0.05)",
+                drawBorder: false,
+              },
               ticks: {
-                color: "#e2e8f0",
+                color: "rgba(255, 255, 255, 0.4)",
+                font: { family: 'Inter', size: 11 },
                 stepSize: 1,
+                padding: 10,
                 callback: function (value) {
                   return Number.isInteger(value) ? value : null;
                 },
               },
+              border: { display: false }
             },
             x: {
-              grid: { color: "rgba(255, 255, 255, 0.1)" },
-              ticks: { color: "#e2e8f0" },
+              grid: { 
+                display: false,
+                drawBorder: false,
+              },
+              ticks: { 
+                color: "rgba(255, 255, 255, 0.4)",
+                font: { family: 'Inter', size: 11 },
+                padding: 10,
+              },
+              border: { display: false }
             },
           },
         }}

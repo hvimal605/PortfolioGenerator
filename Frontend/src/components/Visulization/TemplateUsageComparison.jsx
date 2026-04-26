@@ -4,14 +4,13 @@ import {
   CategoryScale,
   LinearScale,
   BarElement,
-  Title,
   Tooltip,
   Legend,
 } from "chart.js";
 import { Bar } from "react-chartjs-2";
 
 // Register chart components
-ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
+ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 
 const TemplateUsageComparison = ({ usageStats }) => {
   const labels = usageStats.map((template) => template.name);
@@ -21,56 +20,81 @@ const TemplateUsageComparison = ({ usageStats }) => {
     labels,
     datasets: [
       {
-        label: "Users Using Template",
+        label: "Uses",
         data: dataValues,
-        backgroundColor: "rgba(244, 114, 182, 0.6)",
-        borderColor: "#f472b6",
+        backgroundColor: "rgba(217, 70, 239, 0.2)", // fuchsia-500/20
+        borderColor: "rgba(217, 70, 239, 0.8)",     // fuchsia-500
         borderWidth: 2,
-        hoverBackgroundColor: "#fb7185",
-        hoverBorderColor: "#f43f5e",
+        hoverBackgroundColor: "rgba(217, 70, 239, 0.6)",
+        hoverBorderColor: "#ffffff",
+        borderRadius: 4, // rounded bar tops
+        barThickness: 'flex',
+        maxBarThickness: 40,
       },
     ],
   };
 
   const options = {
     responsive: true,
+    maintainAspectRatio: false,
     plugins: {
       legend: { display: false },
       tooltip: {
-        backgroundColor: "rgba(20, 20, 20, 0.9)",
-        titleColor: "#f472b6",
-        bodyColor: "#e2e8f0",
-        borderColor: "#f472b6",
+        backgroundColor: "rgba(10, 10, 10, 0.9)",
+        titleColor: "#ffffff",
+        bodyColor: "#a1a1aa",
+        titleFont: { size: 13, weight: 'bold', family: 'Inter' },
+        bodyFont: { size: 12, font: 'Inter' },
+        padding: 12,
+        borderColor: "rgba(255, 255, 255, 0.1)",
         borderWidth: 1,
+        displayColors: false,
+        callbacks: {
+          label: function(context) {
+            return `Active Users: ${context.parsed.y}`;
+          }
+        }
       },
     },
     scales: {
       y: {
         beginAtZero: true,
-        grid: { color: "rgba(255, 255, 255, 0.1)" },
+        grid: { 
+          color: "rgba(255, 255, 255, 0.05)",
+          drawBorder: false,
+        },
         ticks: {
-          color: "#e2e8f0",
+          color: "rgba(255, 255, 255, 0.4)",
+          font: { family: 'Inter', size: 11 },
           stepSize: 1,
+          padding: 10,
           callback: function (value) {
             return Number.isInteger(value) ? value : null;
           },
         },
+        border: { display: false }
       },
       x: {
-        grid: { color: "rgba(255, 255, 255, 0.1)" },
-        ticks: { color: "#e2e8f0" },
+        grid: { 
+          display: false,
+          drawBorder: false,
+        },
+        ticks: { 
+          color: "rgba(255, 255, 255, 0.4)",
+          font: { family: 'Inter', size: 11 },
+          padding: 10,
+        },
+        border: { display: false }
       },
     },
   };
 
   return (
-    <div className="bg-[#1a1a1a] p-6 rounded-2xl border border-[#f472b6] shadow-2xl hover:shadow-[#f472b6]/50 transition-all duration-300">
-      <h2 className="text-2xl font-semibold text-[#e2e8f0] mb-4">
-        Template Usage Comparison
-      </h2>
-
+    <div className="w-full h-full pb-2">
       {usageStats.length === 0 ? (
-        <p className="text-gray-400">No usage data available.</p>
+        <div className="flex items-center justify-center h-48">
+          <p className="text-zinc-500 text-sm font-semibold italic">No usage data found.</p>
+        </div>
       ) : (
         <Bar data={data} options={options} />
       )}

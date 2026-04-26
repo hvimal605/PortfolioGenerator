@@ -1,4 +1,4 @@
-const otpGenerrator = require('otp-generator')
+const crypto = require("crypto");
 const OTP = require("../models/otp");
 const User = require('../models/User');
 const bcrypt = require('bcrypt')
@@ -6,6 +6,8 @@ const jwt = require('jsonwebtoken');
 const mailSender = require('../utils/mailSender');
 const { uploadImageToCloudinary } = require('../utils/imageUploadToCloudinary');
 const passwordUpdateTemplate = require('../mail/templates/PasswordUpdateTemplate');
+const Portfolio = require("../models/Portfolio");
+const DeveloperTemplateRequest = require("../models/TemplateReqByDev");
 require("dotenv").config()
 
 //sendOTP
@@ -22,22 +24,13 @@ exports.sendOTP = async (req, res) => {
                 message: "User already registered",
             })
         }
-        var otp = otpGenerrator.generate(6, {
-            upperCaseAlphabets: false,
-            lowerCaseAlphabets: false,
-            specialChars: false,
-        })
-        console.log("otp generated", otp);
+        // ✅ SECURITY: Use cryptographically secure random numbers for OTP
+        let otp = crypto.randomInt(100000, 999999).toString();
 
-
-        const result = await OTP.findOne({ otp: otp });
+        let result = await OTP.findOne({ otp: otp });
 
         while (result) {
-            otp = otpGenerrator.generate(6, {
-                upperCaseAlphabets: false,
-                lowerCaseAlphabets: false,
-                specialChars: false,
-            })
+            otp = crypto.randomInt(100000, 999999).toString();
             result = await OTP.findOne({ otp: otp });
         }
 
@@ -51,7 +44,6 @@ exports.sendOTP = async (req, res) => {
         res.status(200).json({
             success: true,
             message: "OTP Sent Successfully",
-            otp,
         })
 
 
@@ -137,6 +129,7 @@ exports.signup = async (req, res) => {
         }
 
         const user = await User.create(userData);
+        user.password = undefined; // ✅ SECURITY: Do not send password back
 
         // Return success response
         return res.status(200).json({
@@ -257,7 +250,7 @@ exports.changePassword = async (req, res) => {
                 "Password for your account has been updated",
                 passwordUpdateTemplate(updatedUserDetails)
             );
-            
+
             // console.log("Email sent successfully:", emailResponse.response)
         } catch (error) {
 
@@ -304,7 +297,7 @@ exports.updateProfile = async (req, res) => {
 
 
         // Find the updated user details
-        const updatedUserDetails = await User.findById(id)
+        const updatedUserDetails = await User.findById(id).select("-password")
 
 
         return res.json({
@@ -322,11 +315,38 @@ exports.updateProfile = async (req, res) => {
 }
 
 
+exports.getUserDetails = async (req, res) => {
+    try {
+        const id = req.user.id;
+        // ✅ SECURITY: Explicitly select only non-internal fields
+        const userDetails = await User.findById(id).select("-password -token -resetPasswordExpires");
+
+        if (!userDetails) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found",
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "User data fetched successfully",
+            data: userDetails,
+        });
+    } catch (error) {
+        console.error("GET USER DETAILS ERROR:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
+        });
+    }
+};
+
+
 exports.deleteAccount = async (req, res) => {
     try {
         const id = req.user.id;
 
-        // Find user
         const userDetails = await User.findById(id);
         if (!userDetails) {
             return res.status(404).json({
@@ -335,23 +355,22 @@ exports.deleteAccount = async (req, res) => {
             });
         }
 
-        // OPTIONAL: Delete all associated portfolios if required
-        // If portfolios are stored in a separate Portfolio model:
-        // await Portfolio.deleteMany({ _id: { $in: userDetails.portfolios } });
+        // ✅ SECURITY: Clean up all associated user data to prevent orphan records
+        await Portfolio.deleteMany({ userId: id });
+        await DeveloperTemplateRequest.deleteMany({ createdBy: id });
 
         // Delete user
         await User.findByIdAndDelete(id);
 
         return res.status(200).json({
             success: true,
-            message: "User deleted successfully",
+            message: "User deleted successfully along with all associated data",
         });
     } catch (error) {
         console.error("DELETE ACCOUNT ERROR:", error);
         return res.status(500).json({
             success: false,
-            message: "User could not be deleted",
-            error: error.message,
+            message: "Internal Server Error. User could not be deleted",
         });
     }
 };
@@ -364,7 +383,7 @@ exports.updateDisplayPicture = async (req, res) => {
 
         const userId = req.user.id
 
-        
+
 
         const userDetails = await User.findById(userId);
         if (!userDetails) {
@@ -373,7 +392,7 @@ exports.updateDisplayPicture = async (req, res) => {
                 message: "User not found",
             });
         }
-        
+
         const image = await uploadImageToCloudinary(
             displayPicture,
             process.env.FOLDER_NAME,

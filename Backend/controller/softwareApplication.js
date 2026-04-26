@@ -98,6 +98,88 @@ exports.deleteApplication = async (req, res) => {
     }
 }
 
+exports.addBulkSoftwareApps = async (req, res) => {
+    try {
+        const { portfolioId, softwareApps } = req.body;
+        
+        if (!portfolioId || !softwareApps) {
+            return res.status(400).json({
+                success: false,
+                message: "Portfolio ID and software applications data are required"
+            });
+        }
+
+        const parsedApps = JSON.parse(softwareApps);
+        const createdApps = [];
+
+        for (const app of parsedApps) {
+            let svgData = {};
+            
+            const fileKey = `appSvg_${app.name}`;
+            if (req.files && req.files[fileKey]) {
+                const image = await uploadImageToCloudinary(
+                    req.files[fileKey],
+                    process.env.FOLDER_NAME,
+                    1000,
+                    1000
+                );
+                svgData = {
+                    public_id: image.public_id,
+                    url: image.secure_url
+                };
+            } 
+            else if (app.iconUrl) {
+                try {
+                    const image = await uploadImageToCloudinary(
+                        app.iconUrl,
+                        process.env.FOLDER_NAME,
+                        1000,
+                        1000
+                    );
+                    svgData = {
+                        public_id: image.public_id,
+                        url: image.secure_url
+                    };
+                } catch (uploadErr) {
+                    console.warn(`Icon upload failed for ${app.name}, using direct URL:`, uploadErr.message);
+                    svgData = {
+                        public_id: `direct_${app.name}`,
+                        url: app.iconUrl
+                    };
+                }
+            } else {
+                continue;
+            }
+
+            const newApp = await softwareApplication.create({
+                name: app.name,
+                svg: svgData
+            });
+
+            createdApps.push(newApp._id);
+        }
+
+        await Portfolio.findByIdAndUpdate(
+            portfolioId,
+            { $push: { softwareApplications: { $each: createdApps } } },
+            { new: true }
+        );
+
+        res.status(200).json({
+            success: true,
+            message: `${createdApps.length} Software Applications synchronized!`,
+        });
+
+    } catch (error) {
+        console.error("Bulk Apps Error:", error);
+        res.status(500).json({
+            success: false,
+            message: "Bulk synchronization failed",
+            error: error.message
+        });
+    }
+};
+
 exports.updateSoftwareApp = async (req, res) => {
     try {
         const { softwareId, name } = req.body;

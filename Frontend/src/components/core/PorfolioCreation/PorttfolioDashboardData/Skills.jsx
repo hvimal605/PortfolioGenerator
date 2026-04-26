@@ -1,14 +1,9 @@
 import { useState, useEffect } from "react";
-import { AiOutlineDelete, AiOutlineCloudUpload, AiOutlineEdit } from "react-icons/ai";
+import { HiOutlineBolt, HiOutlineMagnifyingGlass, HiOutlineXMark, HiPlus, HiOutlineCpuChip, HiOutlineCubeTransparent, HiOutlineCheckBadge, HiOutlineCommandLine, HiOutlineTrash, HiOutlineCheck, HiOutlinePhoto } from "react-icons/hi2";
 import { useSelector } from "react-redux";
-import { toast } from "react-hot-toast";
-import { BsFillImageFill } from "react-icons/bs";
-import { HiOutlineLightningBolt } from "react-icons/hi";
-import { MdEdit, MdDone } from "react-icons/md";
-import {
-  deleteSkill,
-  updateSkill,
-} from "../../../../services/operations/PortfolioApi";
+import { toast } from "sonner";
+import { motion, AnimatePresence } from "framer-motion";
+import { deleteSkill, updateSkill } from "../../../../services/operations/PortfolioApi";
 
 export const Skills = ({ skills }) => {
   const [isEditMode, setIsEditMode] = useState(false);
@@ -46,15 +41,14 @@ export const Skills = ({ skills }) => {
         const updatedSkills = [...localSkills];
         updatedSkills.splice(index, 1);
         setLocalSkills(updatedSkills);
-
         const updatedEdited = [...editedSkills];
         updatedEdited.splice(index, 1);
         setEditedSkills(updatedEdited);
-        toast.success("Skill deleted");
+        toast.success("Skill removed");
       }
     } catch (error) {
       console.error("Error deleting skill:", error);
-      toast.error("Failed to delete skill");
+      toast.error("Failed to remove skill");
     } finally {
       setLoadingIndex(null);
     }
@@ -62,145 +56,120 @@ export const Skills = ({ skills }) => {
 
   const handleUpdate = async (index) => {
     const skill = editedSkills[index];
-
-    if (!skill.newSvgFile) {
-      toast("No changes to update");
-      return;
-    }
-
+    if (!skill.newSvgFile) return;
     const formData = new FormData();
     formData.append("skillId", skill._id);
     formData.append("portfolioId", portfolioId);
-    if (skill.newSvgFile) {
-      formData.append("svg", skill.newSvgFile);
-    }
-
+    formData.append("svg", skill.newSvgFile);
     try {
       setLoadingIndex(index);
       const response = await updateSkill(formData, token);
-
       if (response?.success) {
         const updatedSkills = [...localSkills];
-        if (skill.newSvgFile) {
-          updatedSkills[index].svg = {
-            url: skill.previewSvgUrl,
-          };
-        }
-
+        updatedSkills[index].svg = { url: skill.previewSvgUrl };
         setLocalSkills(updatedSkills);
-        setIsEditMode(false);
+        toast.success("Skill updated");
       }
     } catch (error) {
       console.error("Error updating skill:", error);
-      toast.error("Failed to update skill");
+      toast.error("Update failed");
     } finally {
       setLoadingIndex(null);
     }
   };
 
   return (
-    <div className="w-full bg-black text-white p-6 rounded-xl border border-green-700 mt-5 shadow-[0_0_10px_#1f2937]">
-      {/* Header Section */}
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center items-center text-center gap-4 mb-4 border-b pb-3 border-green-700">
-        <h2 className="text-3xl font-bold flex items-center gap-2 text-green-400">
-          <HiOutlineLightningBolt className="text-green-500" size={26} />
-          Skills
-        </h2>
+    <motion.div 
+      initial={{ opacity: 0, scale: 0.98 }}
+      animate={{ opacity: 1, scale: 1 }}
+      className="bg-gradient-to-br from-[#0a0a0a] to-[#050505] p-8 md:p-10 rounded-[3.5rem] border border-white/5 shadow-2xl relative overflow-hidden group h-full flex flex-col"
+    >
+      <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-emerald-500/5 blur-[100px] rounded-full pointer-events-none opacity-40"></div>
+
+      <header className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8 border-b border-white/5 pb-6 relative z-10">
+        <div className="space-y-1">
+          <p className="text-[10px] font-black uppercase text-emerald-500 tracking-[0.4em]">Your Skills</p>
+          <h2 className="text-3xl md:text-4xl font-black tracking-tighter text-white">
+            Technology <span className="text-gray-500 italic font-medium">Stack</span>
+          </h2>
+        </div>
 
         <button
-          className="flex items-center gap-2 bg-gradient-to-r from-blue-700 to-cyan-600 hover:brightness-125 text-white px-4 py-2 rounded-lg transition-all duration-200"
           onClick={() => setIsEditMode(!isEditMode)}
+          className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest transition-all ${
+            isEditMode 
+            ? "bg-emerald-500 text-black hover:bg-emerald-400 shadow-lg shadow-emerald-500/20" 
+            : "bg-white/5 text-white hover:bg-white/10 border border-white/10"
+          }`}
         >
-          {isEditMode ? (
-            <>
-              <MdDone size={18} />
-              Done
-            </>
-          ) : (
-            <>
-              <AiOutlineEdit size={18} />
-              Manage
-            </>
-          )}
+          {isEditMode ? <><HiOutlineCheck className="text-lg" /> Finish</> : <><HiOutlineBolt className="text-emerald-500" /> Edit Skills</>}
         </button>
-      </div>
+      </header>
 
-      {/* Skills Grid */}
-      <div className="p-2 rounded-lg grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-6 gap-y-8">
-        {localSkills.map((skill, index) => {
-          const edited = editedSkills[index];
-          const isUnchanged = !edited?.newSvgFile;
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6 relative z-10 flex-1">
+        <AnimatePresence mode="popLayout">
+          {localSkills.map((skill, index) => {
+            const edited = editedSkills[index];
+            const isModified = !!edited?.newSvgFile;
 
-          return (
-            <div
-              key={index}
-              className="flex flex-col items-center relative group bg-[#1e293b] border border-gray-700 rounded-2xl p-4 hover:scale-[1.05] transition-transform duration-300 ease-in-out shadow-lg hover:shadow-blue-500/20"
-            >
-              {/* Skill Title */}
-              <span className="text-center text-lg font-semibold text-gray-100 break-words">
-                {skill.title}
-              </span>
+            return (
+              <motion.div
+                key={skill._id || index}
+                layout
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                className="group/card relative bg-white/[0.02] border border-white/5 p-6 rounded-[2.5rem] flex flex-col items-center gap-4 hover:bg-white/[0.04] hover:border-emerald-500/30 transition-all duration-500 hover:-translate-y-1 shadow-lg hover:shadow-emerald-500/5"
+              >
+                <div className="relative">
+                  <div className="w-20 h-20 bg-black/40 border border-white/10 rounded-3xl flex items-center justify-center p-4 relative z-10 group-hover/card:scale-110 transition-transform duration-500 overflow-hidden">
+                    {(isEditMode && edited?.previewSvgUrl) || skill.svg?.url ? (
+                      <img src={(isEditMode && edited?.previewSvgUrl) || skill.svg.url} alt={skill.title} className="w-full h-full object-contain" />
+                    ) : (
+                      <HiOutlinePhoto className="text-gray-800 text-3xl" />
+                    )}
+                  </div>
+                  <div className="absolute -inset-2 bg-emerald-500/10 blur-xl rounded-full opacity-0 group-hover/card:opacity-100 transition-opacity"></div>
+                </div>
 
-              {isEditMode ? (
-                <>
-                  {/* SVG Upload */}
-                  <label
-                    htmlFor={`file-input-${index}`}
-                    className="mt-3 flex items-center gap-2 text-sm bg-blue-600 text-white px-3 py-1.5 rounded-lg cursor-pointer hover:bg-blue-700 transition"
-                  >
-                    <BsFillImageFill size={18} />
-                    Upload
-                  </label>
-                  <input
-                    id={`file-input-${index}`}
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(e) => handleSvgChange(index, e.target.files[0])}
-                  />
+                <div className="text-center w-full">
+                   <h3 className="text-xs font-black text-white uppercase tracking-widest truncate px-1">{skill.title}</h3>
+                   {isEditMode && (
+                     <div className="mt-4 flex flex-col gap-2">
+                        <label className="cursor-pointer bg-white/5 border border-white/10 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest text-gray-500 hover:text-white hover:bg-white/10 transition-colors inline-block w-full">
+                           Change Icon
+                           <input type="file" className="hidden" accept="image/*" onChange={(e) => handleSvgChange(index, e.target.files[0])} />
+                        </label>
+                        {isModified && (
+                          <button onClick={() => handleUpdate(index)} disabled={loadingIndex === index} className="w-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-emerald-500 hover:text-black transition-all">
+                            Save Icon
+                          </button>
+                        )}
+                     </div>
+                   )}
+                </div>
 
-                  {/* Preview */}
-                  {edited?.previewSvgUrl && (
-                    <img
-                      src={edited.previewSvgUrl}
-                      alt="Preview"
-                      className="w-16 h-16 mt-2 object-contain rounded-lg border border-gray-600"
-                    />
-                  )}
-
-                  {/* Update Button */}
+                {isEditMode && (
                   <button
-                    onClick={() => handleUpdate(index)}
-                    disabled={loadingIndex === index || isUnchanged}
-                    className="mt-3 flex items-center gap-2 text-xs bg-green-500 hover:bg-green-600 text-white px-4 py-1.5 rounded-lg transition-all disabled:opacity-50"
+                    onClick={() => handleDelete(index, skill._id)}
+                    disabled={loadingIndex === index}
+                    className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-red-500 text-white flex items-center justify-center shadow-xl opacity-0 group-hover/card:opacity-100 transition-opacity translate-x-2 -translate-y-2 group-hover/card:translate-x-0 group-hover/card:translate-y-0"
                   >
-                    Update <AiOutlineCloudUpload size={14} />
+                    <HiOutlineTrash className="text-sm" />
                   </button>
-                </>
-              ) : (
-                skill.svg?.url && (
-                  <img
-                    src={skill.svg.url}
-                    alt={skill.title}
-                    className="w-24 h-24 mt-3 object-contain rounded-xl border border-gray-700 shadow-inner"
-                  />
-                )
-              )}
-
-              {/* Delete Button */}
-              {isEditMode && (
-                <button
-                  onClick={() => handleDelete(index, skill._id)}
-                  disabled={loadingIndex === index}
-                  className="absolute top-2 right-2 text-red-500 hover:text-red-700 bg-gray-900 p-2 rounded-full shadow-lg transition-all duration-200 disabled:opacity-50"
-                >
-                  <AiOutlineDelete size={18} />
-                </button>
-              )}
-            </div>
-          );
-        })}
+                )}
+              </motion.div>
+            );
+          })}
+        </AnimatePresence>
       </div>
-    </div>
+
+      {!localSkills.length && (
+        <div className="text-center py-20 border-2 border-dashed border-white/5 rounded-[3rem]">
+          <HiOutlineBolt className="mx-auto text-6xl text-gray-800 mb-4" />
+          <p className="text-gray-600 font-black uppercase tracking-widest text-xs">No skills added yet</p>
+        </div>
+      )}
+    </motion.div>
   );
 };

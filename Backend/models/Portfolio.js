@@ -5,6 +5,7 @@ const portfolioSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
     required: true,
+    index: true,
   },
   templateId: {
     type: mongoose.Schema.Types.ObjectId,
@@ -122,7 +123,8 @@ const portfolioSchema = new mongoose.Schema({
   slug: {
     type: String,
     unique: true,
-    required: true
+    required: true,
+    index: true,
   },
 
   totalVisitors: {

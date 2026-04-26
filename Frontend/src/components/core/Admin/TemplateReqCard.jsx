@@ -1,115 +1,105 @@
 import React from "react";
-import { FaDownload, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
-import { MdPending } from "react-icons/md";
-import { Link } from "react-router-dom";
+import { HiOutlineArrowDownTray, HiOutlineCheckCircle, HiOutlineXCircle, HiOutlineClock } from "react-icons/hi2";
+import { motion } from "framer-motion";
 
-const statusStyle = {
+const statusConfig = {
   Approved: {
     label: "Approved",
-    color: "text-green-400",
-    icon: <FaCheckCircle className="text-green-400" size={16} />,
-    border: "border-green-500/50",
-    glow: "shadow-[0_0_10px_#22c55e33]",
+    color: "emerald",
+    icon: <HiOutlineCheckCircle />,
+    glow: "rgba(16,185,129,0.3)"
   },
   Rejected: {
     label: "Rejected",
-    color: "text-red-400",
-    icon: <FaTimesCircle className="text-red-400" size={16} />,
-    border: "border-red-500/50",
-    glow: "shadow-[0_0_10px_#ef444433]",
+    color: "pink",
+    icon: <HiOutlineXCircle />,
+    glow: "rgba(236,72,153,0.3)"
   },
   Pending: {
     label: "Pending",
-    color: "text-yellow-400",
-    icon: <MdPending className="text-yellow-400" size={18} />,
-    border: "border-yellow-500/50",
-    glow: "shadow-[0_0_10px_#eab30833]",
+    color: "amber",
+    icon: <HiOutlineClock />,
+    glow: "rgba(245,158,11,0.3)"
   },
 };
 
 const TemplateReqCard = ({ template, onStatusChange }) => {
   const { status } = template;
-  const style = statusStyle[status] || statusStyle["Pending"];
+  const config = statusConfig[status] || statusConfig["Pending"];
 
   return (
-    <div className={`relative bg-[#0e1014]/60 backdrop-blur-md border ${style.border} ${style.glow} rounded-2xl p-6 text-white shadow-xl hover:scale-[1.02] transition-transform duration-300`}>
-      
-      {/* Top shimmer border */}
-      <div className="absolute -top-[1px] left-1/2 -translate-x-1/2 w-1/2 h-[2px] bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 blur-sm animate-pulse"></div>
+    <motion.div 
+      whileHover={{ y: -5 }}
+      className="group relative bg-[#0A0A0A]/60 backdrop-blur-3xl border border-white/10 rounded-[2.5rem] p-8 shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden transition-all"
+    >
+      {/* Status Accent Glow */}
+      <div 
+         className={`absolute top-0 right-0 w-40 h-40 blur-[100px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700
+            ${config.color === 'emerald' ? 'bg-emerald-500/20' : 
+              config.color === 'pink' ? 'bg-pink-500/20' : 'bg-amber-500/20'}`}
+      ></div>
 
-      {/* Header */}
-      <div className="flex justify-between items-start mb-3">
-        <div>
-          <h2 className="text-xl font-bold tracking-tight">{template.name}</h2>
-          <p className="text-sm text-gray-400 mt-1">{template.description}</p>
+      <div className="relative z-10 flex flex-col gap-6">
+        {/* Header Area */}
+        <div className="flex justify-between items-start">
+           <div className="flex flex-col gap-1">
+              <h3 className="text-xl font-black tracking-tight text-white">{template.name}</h3>
+              <p className="text-zinc-500 text-xs font-medium italic truncate max-w-[200px]">{template.description}</p>
+           </div>
+           <div className={`flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-widest
+               ${config.color === 'emerald' ? 'text-emerald-400 border-emerald-500/20 shadow-[0_0_15px_rgba(16,185,129,0.2)]' : 
+                 config.color === 'pink' ? 'text-pink-400 border-pink-500/20 shadow-[0_0_15px_rgba(236,72,153,0.2)]' : 
+                 'text-amber-400 border-amber-500/20 shadow-[0_0_15px_rgba(245,158,11,0.2)]'}`}
+           >
+              <span className="text-sm">{config.icon}</span>
+              {config.label}
+           </div>
         </div>
-        <div
-          className={`flex items-center gap-2 text-xs font-semibold px-3 py-1 rounded-full bg-black/30 border ${style.border}`}
-        >
-          {style.icon}
-          {style.label}
+
+        {/* Submission Details */}
+        <div className="grid grid-cols-2 gap-4 py-6 border-y border-white/5">
+           <div className="flex flex-col gap-1">
+              <span className="text-[9px] font-black uppercase tracking-[0.3em] text-white/30">Creator</span>
+              <span className="text-xs font-bold text-white truncate">{template.createdBy.firstName} {template.createdBy.lastName}</span>
+           </div>
+           <div className="flex flex-col gap-1">
+              <span className="text-[9px] font-black uppercase tracking-[0.3em] text-white/30">Submitted</span>
+              <span className="text-xs font-bold text-white">{new Date(template.createdAt).toLocaleDateString()}</span>
+           </div>
+        </div>
+
+        {/* Action Controls */}
+        <div className="flex items-center gap-3 mt-2">
+           <a
+             href={template.uploadedUrl}
+             target="_blank"
+             rel="noopener noreferrer"
+             className="flex-1 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center gap-3 text-xs font-black uppercase tracking-widest text-zinc-400 hover:text-white hover:bg-white/10 transition-all group/dl"
+           >
+              <HiOutlineArrowDownTray className="text-lg group-hover/dl:scale-110 transition-transform" />
+              Download Build
+           </a>
+
+           <div className="relative group/sel">
+              <select
+                value={status}
+                onChange={(e) => onStatusChange(template._id, e.target.value)}
+                className={`h-12 w-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-zinc-400 appearance-none text-center focus:outline-none focus:ring-1 focus:ring-white/20 transition-all group-hover/sel:bg-white/10 cursor-pointer
+                    ${status === 'Approved' ? 'text-emerald-400 border-emerald-500/20' : 
+                      status === 'Rejected' ? 'text-pink-400 border-pink-500/20' : 'text-amber-400 border-amber-500/20'}`}
+              >
+                <option value="Pending">P</option>
+                <option value="Approved">A</option>
+                <option value="Rejected">R</option>
+              </select>
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
+                 <span className="text-[9px] font-black opacity-0 group-hover/sel:opacity-40 uppercase">Status</span>
+              </div>
+           </div>
         </div>
       </div>
 
-      {/* Metadata */}
-      <div className="text-sm space-y-1 text-gray-300 mb-4">
-        <p>
-          Uploaded by:{" "}
-          <span className="text-white font-medium">
-            {template.createdBy.firstName} {template.createdBy.lastName}
-          
-          </span>
-          
-        </p>
-
-        <p>
-          DeveloperId:{" "}
-          <span className="text-white font-medium">
-            {template.createdBy._id} 
-          
-          </span>
-          
-        </p>
-        <p>
-          Created at:{" "}
-          <span className="text-white">
-            {new Date(template.createdAt).toLocaleString()}
-          </span>
-        </p>
-        {template.reviewedAt && (
-          <p>
-            Reviewed at:{" "}
-            <span className="text-blue-400">
-              {new Date(template.reviewedAt).toLocaleString()}
-            </span>
-          </p>
-        )}
-      </div>
-
-      {/* Actions */}
-      <div className="flex flex-wrap gap-3">
-        
-
-        <Link
-          to={`${template.uploadedUrl}`}
-          download
-          className="flex items-center gap-2 bg-gray-900 hover:bg-gray-800 px-4 py-2 rounded-lg text-sm shadow-sm"
-        >
-          <FaDownload size={14} />
-          Download
-        </Link>
-
-        <select
-          value={status}
-          onChange={(e) => onStatusChange(template._id, e.target.value)}
-          className="bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
-        >
-          <option value="Pending">Pending</option>
-          <option value="Approved">Approved</option>
-          <option value="Rejected">Rejected</option>
-        </select>
-      </div>
-    </div>
+    </motion.div>
   );
 };
 

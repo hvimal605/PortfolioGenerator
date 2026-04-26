@@ -1,4 +1,4 @@
-import { toast } from "react-hot-toast"
+import { toast } from "sonner"
 import { apiConnector } from "../apiConnector"
 import { TemplateEndpoints } from "../apis"
 
@@ -13,7 +13,8 @@ const {
    GET_MONTHLY_REQUESTED_TEMPLATES,
    GET_TOP_USED_TEMPLATES,
    GET_ALL_REQUESTED_TEMPLATE_API,
-   REVIEW_TEMPLATE_REQUEST
+   REVIEW_TEMPLATE_REQUEST,
+   GET_ALL_PURCHASED_TEMPLATE
   } = TemplateEndpoints
 
   export const getAllTemplates = async () => {
@@ -275,3 +276,29 @@ export const reviewTemplateRequest = async (templateId, action, token) => {
     toast.dismiss(toastId);
   }
 };
+
+
+export const getPurchasedTemplate = async (token) => {
+  const toastId = toast.loading("Loading...")
+
+  let result = null
+  try {
+    const response = await apiConnector("GET", GET_ALL_PURCHASED_TEMPLATE, null,
+
+      {
+        Authorization: `Bearer ${token}`,
+      }
+    )
+    // console.log("Templates_FOR_USER_API RESPONSE............", response.data)
+
+    if (!response.data.success) {
+      throw new Error(response.data.message)
+    }
+    result = response?.data
+  } catch (error) {
+    console.log("Purchased_Template  ERROR............", error)
+    result = error.response.data
+  }
+  toast.dismiss(toastId)
+  return result
+}

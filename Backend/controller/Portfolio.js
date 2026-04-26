@@ -1,6 +1,7 @@
 const Portfolio = require("../models/Portfolio");
 const Template = require("../models/Template");
 const User = require("../models/User");
+const PaymentRecord = require("../models/PaymentRecord");
 const { uploadImageToCloudinary } = require("../utils/imageUploadToCloudinary");
 
 
@@ -193,13 +194,12 @@ exports.createPortfolio = async (req, res) => {
     let socialLinks = [];
     console.log("SOCIAL LINKS RAW BODY:", req.body.socialLinks);
 
-    // Extract stringified array from req.body (FormData sends them as array of strings)
     if (req.body.socialLinks) {
       try {
         const links = Array.isArray(req.body.socialLinks)
           ? req.body.socialLinks
-          : [req.body.socialLinks]; // In case there's only one item
-    
+          : [req.body.socialLinks];
+
         socialLinks = links.map((linkStr) => JSON.parse(linkStr));
       } catch (err) {
         return res.status(400).json({
@@ -208,7 +208,6 @@ exports.createPortfolio = async (req, res) => {
         });
       }
     }
-    // Extract other necessary fields from the request body
     const { templateId, FirstName, LastName, phone, email, roles, aboutme } = req.body;
     const userId = req.user.id;
 
@@ -218,6 +217,26 @@ exports.createPortfolio = async (req, res) => {
         success: false,
         message: "All required fields must be provided.",
       });
+    }
+
+    // ✅ Mandatory Premium Template Ownership Check
+    const template = await Template.findById(templateId);
+    if (!template) {
+      return res.status(404).json({ success: false, message: "Template not found" });
+    }
+
+    if (template.templateType === "premium") {
+      const user = await User.findById(userId);
+      const hasPurchased = user.purchasedTemplates.some(
+        (id) => id.toString() === templateId.toString()
+      );
+
+      if (!hasPurchased) {
+        return res.status(403).json({
+          success: false,
+          message: `Forbidden: You haven't purchased the ${template.name} template yet.`,
+        });
+      }
     }
 
     // Handle avatar and resume file uploads...
@@ -286,11 +305,10 @@ exports.createPortfolio = async (req, res) => {
       portfolio,
     });
   } catch (error) {
-    // Log the error and send a server error response
     console.error("Error creating portfolio:", error);
     res.status(500).json({
       success: false,
-      message: "Server error. Please try again later.",
+      message: "Internal Server Error. Please try again later.",
     });
   }
 };
@@ -307,16 +325,16 @@ exports.updatePortfolioDetails = async (req, res) => {
       phone,
       email,
       aboutme,
-      roles, 
+      roles,
       socialLinks,
     } = req.body;
-  
-  
-   
+
+
+
     let parsedSocialLinks = socialLinks;
     if (typeof socialLinks === 'string') {
       try {
-        parsedSocialLinks = JSON.parse(socialLinks); 
+        parsedSocialLinks = JSON.parse(socialLinks);
       } catch (error) {
         console.error("Error parsing socialLinks:", error);
         return res.status(400).json({
@@ -326,7 +344,7 @@ exports.updatePortfolioDetails = async (req, res) => {
       }
     }
 
-   
+
 
     if (!portfolioId) {
       return res.status(400).json({
@@ -344,7 +362,7 @@ exports.updatePortfolioDetails = async (req, res) => {
       });
     }
 
-   
+
 
     // Handle optional file uploads
     const avatar = req.files?.avatar;
@@ -392,7 +410,7 @@ exports.updatePortfolioDetails = async (req, res) => {
 
     // Compare the socialLinks to detect changes
     if (Array.isArray(parsedSocialLinks)) {
-     
+
       const isSocialLinksChanged = JSON.stringify(parsedSocialLinks) !== JSON.stringify(portfolio.socialLinks);
 
       if (isSocialLinksChanged) {
@@ -409,7 +427,7 @@ exports.updatePortfolioDetails = async (req, res) => {
 
     portfolio.updatedAt = new Date();
 
-    const updatedPortfolio = await portfolio.save(); 
+    const updatedPortfolio = await portfolio.save();
 
     res.status(200).json({
       success: true,
@@ -420,7 +438,7 @@ exports.updatePortfolioDetails = async (req, res) => {
     console.error("Error updating portfolio:", error);
     res.status(500).json({
       success: false,
-      message: "Server error. Please try again later.",
+      message: "Internal Server Error. Please try again later.",
     });
   }
 };
@@ -451,8 +469,7 @@ exports.getPortfolioDetailsById = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: "Error fetching portfolio details",
-      error: error.message,
+      message: "Internal Server Error. Failed to fetch portfolio details",
     });
   }
 };
@@ -492,7 +509,7 @@ exports.getPortfolioBySlug = async (req, res) => {
     console.error("Error fetching portfolio by slug:", error);
     res.status(500).json({
       success: false,
-      message: "Server error. Please try again later.",
+      message: "Internal Server Error. Please try again later.",
     });
   }
 };
@@ -539,7 +556,7 @@ exports.getPortfoliosForUser = async (req, res) => {
     console.error(err);
     res.status(500).json({
       success: false,
-      message: "Server error",
+      message: "Internal Server Error",
     });
   }
 };
@@ -586,7 +603,7 @@ exports.trackVisitofPortfolio = async (req, res) => {
 
   } catch (error) {
     console.error("Visit track error:", error);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };
 
@@ -614,7 +631,7 @@ exports.getVisitorStats = async (req, res) => {
     });
   } catch (err) {
     console.error("Error fetching visitor stats:", err);
-    res.status(500).json({ success: false, message: "Server error" });
+    res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };
 
@@ -630,6 +647,11 @@ exports.getallstats = async (req, res) => {
     });
 
 
+    const totalRevenueResult = await PaymentRecord.aggregate([
+      { $group: { _id: null, total: { $sum: "$amount" } } },
+    ]);
+    const totalRevenue = totalRevenueResult.length > 0 ? totalRevenueResult[0].total : 0;
+
     return res.status(200).json({
       success: true,
       message: "Dashboard stats fetched successfully",
@@ -638,6 +660,7 @@ exports.getallstats = async (req, res) => {
         totalDevelopers,
         totalTemplates,
         deployedPortfolios,
+        totalRevenue,
       },
     });
   } catch (error) {
@@ -652,14 +675,16 @@ exports.getallstats = async (req, res) => {
 exports.getMonthlyUserDeveloperPortfolioStats = async (req, res) => {
   try {
     const currentYear = new Date().getFullYear();
+    const startOfYear = new Date(`${currentYear}-01-01`);
+    const endOfYear = new Date(`${currentYear + 1}-01-01`); // Exclusive upper bound
 
     // Monthly User count (accountType: User)
     const monthlyUsers = await User.aggregate([
       {
         $match: {
           createdAt: {
-            $gte: new Date(`${currentYear}-01-01`),
-            $lte: new Date(`${currentYear}-12-31`),
+            $gte: startOfYear,
+            $lt: endOfYear,
           },
           accountType: "User",
         },
@@ -677,8 +702,8 @@ exports.getMonthlyUserDeveloperPortfolioStats = async (req, res) => {
       {
         $match: {
           createdAt: {
-            $gte: new Date(`${currentYear}-01-01`),
-            $lte: new Date(`${currentYear}-12-31`),
+            $gte: startOfYear,
+            $lt: endOfYear,
           },
           accountType: "Developer",
         },
@@ -691,15 +716,14 @@ exports.getMonthlyUserDeveloperPortfolioStats = async (req, res) => {
       },
     ]);
 
-    // Monthly fully-created portfolios (having deployLink)
+    // Monthly portfolios created (including all, not just deployed)
     const monthlyPortfolios = await Portfolio.aggregate([
       {
         $match: {
           createdAt: {
-            $gte: new Date(`${currentYear}-01-01`),
-            $lte: new Date(`${currentYear}-12-31`),
+            $gte: startOfYear,
+            $lt: endOfYear,
           },
-          deployLink: { $exists: true, $ne: null, $ne: "" },
         },
       },
       {
@@ -714,14 +738,14 @@ exports.getMonthlyUserDeveloperPortfolioStats = async (req, res) => {
     const result = Array.from({ length: 12 }, (_, i) => {
       const monthIndex = i + 1;
 
-      const userEntry = monthlyUsers.find((u) => u._id === monthIndex);
-      const devEntry = monthlyDevelopers.find((d) => d._id === monthIndex);
+      const userCount = monthlyUsers.find((u) => u._id === monthIndex)?.count || 0;
+      const devCount = monthlyDevelopers.find((d) => d._id === monthIndex)?.count || 0;
       const portfolioEntry = monthlyPortfolios.find((p) => p._id === monthIndex);
 
       return {
         month: new Date(currentYear, i).toLocaleString("default", { month: "short" }),
-        users: userEntry ? userEntry.count : 0,
-        developers: devEntry ? devEntry.count : 0,
+        users: userCount + devCount, // Sum both for total new signups in visualization
+        developers: devCount,
         portfolios: portfolioEntry ? portfolioEntry.count : 0,
       };
     });
@@ -735,7 +759,7 @@ exports.getMonthlyUserDeveloperPortfolioStats = async (req, res) => {
     console.error("MONTHLY_STATS_FETCH_ERROR:", err);
     return res.status(500).json({
       success: false,
-      message: "Failed to fetch monthly stats",
+      message: "Internal Server Error. Failed to fetch monthly stats",
     });
   }
 };

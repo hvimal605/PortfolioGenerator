@@ -72,8 +72,6 @@ exports.googleSignup = async (req, res) => {
 
 
 
-// authController.js
-
 
 
 
@@ -93,7 +91,7 @@ exports.googleLogin = async (req, res) => {
 
         let user = await User.findOne({ email });
 
-        
+
         if (!user) {
             return res.status(400).json({
                 success: false,
@@ -101,7 +99,7 @@ exports.googleLogin = async (req, res) => {
                 message: "You don't have an account. Please sign up first."
             });
         }
-        
+
 
         // Generate JWT token
         const tokenPayload = {

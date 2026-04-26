@@ -7,26 +7,28 @@ import { GoogleOAuthProvider } from '@react-oauth/google';
 import { configureStore } from '@reduxjs/toolkit';
 import {Provider} from "react-redux"
 import rootReducer from './reducer';
-import { Toaster } from 'react-hot-toast';
+import { Toaster } from 'sonner';
 
 
 const store = configureStore({
-  reducer:rootReducer,
-})
+  reducer: rootReducer,
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      serializableCheck: {
+        // Ignore these action types
+        ignoredActions: ['portfolio/setResumeFile'],
+        // Ignore these paths in the state
+        ignoredPaths: ['portfolio.resumeFile'],
+      },
+    }),
+});
 
 createRoot(document.getElementById('root')).render(
   <Provider store ={store} >
   <StrictMode>
-    <BrowserRouter>
+    <BrowserRouter >
     <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
-
-      <Toaster  toastOptions={{
-          style: {
-            borderRadius: '10px',
-            background: '#333',
-            color: '#fff',
-          },
-        }}/>
+      <Toaster richColors position="top-right" expand={true} closeButton />
     <App />
     </GoogleOAuthProvider>
     </BrowserRouter>

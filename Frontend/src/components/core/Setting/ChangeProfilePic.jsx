@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react"
-import { FiUpload } from "react-icons/fi"
+import { HiOutlineCamera } from "react-icons/hi2"
 import { useDispatch, useSelector } from "react-redux"
 import { updateDisplayPicture } from "../../../services/operations/SettingApi"
 
@@ -37,6 +37,7 @@ export default function ChangeProfilePicture() {
       dispatch(updateDisplayPicture(token, formData)).then(() => setLoading(false))
     } catch (error) {
       console.log("ERROR MESSAGE - ", error.message)
+      setLoading(false)
     }
   }
 
@@ -45,47 +46,62 @@ export default function ChangeProfilePicture() {
   }, [imageFile])
 
   return (
-    <div className="w-full bg-black/40 backdrop-blur-md border border-white/10 shadow-[0_0_25px_#00000070] p-6 sm:p-8 rounded-2xl text-white flex flex-col md:flex-row items-center justify-between gap-6 transition-all duration-300">
-      {/* Avatar and Text */}
-      <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 w-full">
-        <img
-          src={previewSource || user?.image}
-          alt={`profile-${user?.firstName}`}
-          className="w-[72px] sm:w-[84px] h-[72px] sm:h-[84px] rounded-full object-cover border-2 border-pink-500 shadow-[0_0_20px_#ec489980] hover:scale-105 transition-transform duration-300"
-        />
-        <div className="text-center sm:text-left w-full">
-          <p className="text-lg font-semibold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-red-400">
-            Change Profile Picture
-          </p>
-          {/* Buttons */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-center sm:justify-start gap-3 mt-3 w-full">
-            <input
-              type="file"
-              ref={fileInputRef}
-              onChange={handleFileChange}
-              className="hidden"
-              accept="image/png, image/gif, image/jpeg"
-            />
+    <div className="bg-[#0a0a0a]/80 backdrop-blur-xl border border-white/5 rounded-[2rem] p-6 shadow-[0_8px_30px_rgba(0,0,0,0.4)] flex flex-col items-center text-center relative overflow-hidden group">
+      <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none rounded-[2rem]" />
+      
+      <div className="relative mb-6 group/avatar">
+        <div className="w-28 h-28 rounded-full bg-gradient-to-tr from-cyan-500 to-blue-600 p-[2px] shadow-[0_0_20px_rgba(34,211,238,0.2)] mx-auto relative z-10 transition-transform duration-500 group-hover/avatar:scale-105">
+          <img
+            src={previewSource || user?.image}
+            alt={`profile-${user?.firstName}`}
+            className="w-full h-full rounded-full object-cover border border-white/20 bg-black"
+          />
+          <button 
+            onClick={handleClick}
+            className="absolute bottom-0 right-0 w-9 h-9 bg-cyan-500 rounded-full flex items-center justify-center text-black shadow-lg border-2 border-black hover:bg-cyan-400 transition-colors"
+          >
+            <HiOutlineCamera className="text-xl" />
+          </button>
+        </div>
+      </div>
+
+      <h3 className="text-xl font-bold text-white mb-2">Display Picture</h3>
+      <p className="text-sm text-neutral-400 mb-6 font-medium px-4">Upload a new avatar. Recommended size is 256x256px.</p>
+
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleFileChange}
+        className="hidden"
+        accept="image/png, image/gif, image/jpeg"
+      />
+
+      <div className="w-full flex gap-3 relative z-10">
+        {imageFile ? (
+          <>
             <button
-              onClick={handleClick}
+              onClick={() => { setImageFile(null); setPreviewSource(null) }}
               disabled={loading}
-              className="w-full sm:w-auto bg-gradient-to-r from-gray-700 to-gray-800 hover:from-gray-600 hover:to-gray-700 text-white font-medium px-5 py-2 rounded-lg transition-all duration-300 disabled:opacity-50"
+              className="flex-1 py-3 bg-white/5 hover:text-white border border-white/10 rounded-xl text-neutral-300 font-bold tracking-wide hover:bg-white/10 transition-colors disabled:opacity-50"
             >
-              Select
+              Cancel
             </button>
             <button
               onClick={handleFileUpload}
               disabled={loading}
-              className={`w-full sm:w-auto flex items-center justify-center gap-2 font-medium px-5 py-2 rounded-lg transition-all duration-300 ${
-                loading
-                  ? "bg-yellow-300/50 cursor-not-allowed"
-                  : "bg-gradient-to-r from-yellow-300 to-yellow-400 text-black hover:brightness-105"
-              }`}
+              className="flex-1 py-3 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-xl text-black font-extrabold tracking-wide shadow-[0_0_15px_rgba(34,211,238,0.3)] hover:shadow-[0_0_25px_rgba(34,211,238,0.5)] transition-all disabled:opacity-50 disabled:grayscale"
             >
-              {loading ? "Uploading..." : "Upload"} {!loading && <FiUpload className="text-lg" />}
+              {loading ? "Saving..." : "Save Image"}
             </button>
-          </div>
-        </div>
+          </>
+        ) : (
+          <button
+            onClick={handleClick}
+            className="w-full py-3 bg-white/5 border border-white/10 rounded-xl text-neutral-300 font-bold tracking-wide hover:bg-white/10 hover:text-white transition-colors"
+          >
+            Browse Files
+          </button>
+        )}
       </div>
     </div>
   )

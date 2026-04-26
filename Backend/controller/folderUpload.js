@@ -57,8 +57,7 @@ exports.uploadFolder = async (req, res) => {
                 .promise()
                 .then(async () => {
                     // Define the Cloudinary folder name
-                    const cloudinaryFolder = 'HelloJi'; // Replace with your desired folder name
-
+                    const cloudinaryFolder = 'HelloJi'; 
                     // Upload extracted files to Cloudinary
                     const uploadedUrls = await uploadExtractedFiles(tempDir, cloudinaryFolder);
 

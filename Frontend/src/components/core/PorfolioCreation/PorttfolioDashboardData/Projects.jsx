@@ -1,19 +1,22 @@
 import { useEffect, useState } from "react";
-import { toast } from "react-hot-toast";
+import { toast } from "sonner";
 import { deleteProject, updateProject } from "../../../../services/operations/PortfolioApi";
 import { useSelector } from "react-redux";
 import ProjectEditModal from "./ProjectEditModal";
-import { motion } from "framer-motion";
-import { MdDone } from 'react-icons/md';
-import { AiOutlineEdit } from 'react-icons/ai';
-import { FaEye } from "react-icons/fa6";
-import { FiEdit } from "react-icons/fi";
-import { AiTwotoneDelete } from "react-icons/ai";
-import { FaProjectDiagram } from "react-icons/fa";
+import { motion, AnimatePresence } from "framer-motion";
+import { HiOutlineTrash, HiOutlinePencil, HiOutlineEye, HiCheck, HiOutlineExternalLink, HiOutlineCode, HiOutlineCollection } from "react-icons/hi";
+import COMMON_SKILLS from "../../../../data/skills.json";
+import { findSkill } from "../../../../utils/skillMatcher";
+
+// Helper to find skill icon by tech name
+const getSkillIcon = (techName) => {
+  const match = findSkill(techName.trim());
+  return match ? match.iconUrl : null;
+};
+
 export const Projects = ({ projects }) => {
   const [manageMode, setManageMode] = useState(false);
   const [projectList, setProjectList] = useState(projects);
-  const [previewImage, setPreviewImage] = useState(null);
   const [editingProject, setEditingProject] = useState(null);
   const [isViewOnly, setIsViewOnly] = useState(false);
 
@@ -30,9 +33,10 @@ export const Projects = ({ projects }) => {
       const res = await deleteProject({ projectId, portfolioId, token });
       if (res) {
         setProjectList((prev) => prev.filter((proj) => proj._id !== projectId));
+        toast.success("Project deleted");
       }
     } catch (err) {
-      toast.error("Something went wrong!");
+      toast.error("Delete failed");
     }
   };
 
@@ -46,15 +50,8 @@ export const Projects = ({ projects }) => {
     setIsViewOnly(false);
   };
 
-  const updateProjectList = (updatedProject) => {
-    setProjectList((prev) =>
-      prev.map((proj) => (proj?._id === updatedProject?._id ? updatedProject : proj))
-    );
-  };
-
   const handleSave = async () => {
     if (!editingProject) return;
-
     const formData = new FormData();
     formData.append("title", editingProject.title);
     formData.append("description", editingProject.description);
@@ -63,180 +60,163 @@ export const Projects = ({ projects }) => {
     formData.append("projectLink", editingProject.projectLink);
     formData.append("projectId", editingProject._id);
 
-    if (editingProject.projectBanner instanceof File) {
+    // Track which existing banners are being kept
+    const preservedBanners = editingProject.projectBanners || (editingProject.projectBanner ? [editingProject.projectBanner] : []);
+    formData.append("retainedBanners", JSON.stringify(preservedBanners));
+
+    // Support multiple new banner files
+    if (editingProject.newBannerFiles && editingProject.newBannerFiles.length > 0) {
+      editingProject.newBannerFiles.forEach(file => {
+        formData.append("projectBanners", file);
+      });
+    } else if (editingProject.projectBanner instanceof File) {
       formData.append("projectBanner", editingProject.projectBanner);
     }
 
     try {
       const response = await updateProject(formData, token);
-
-      if (response && response.projectRes) {
-        updateProjectList(response.projectRes);
-        toast.success("Project updated successfully!");
+      if (response?.projectRes) {
+        setProjectList(prev => prev.map(p => p._id === response.projectRes._id ? response.projectRes : p));
+        toast.success("Project updated");
         setEditingProject(null);
-        setIsViewOnly(false);
       }
     } catch (error) {
-      toast.error("Failed to update the project!");
-      console.error("Error updating project:", error);
+      toast.error("Update failed");
     }
   };
 
   return (
-    <div className="w-full mt-6 p-6 bg-black border border-purple-700 rounded-lg shadow-[0_0_10px_#1f2937] ">
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center items-center text-center gap-4 mb-4 border-b pb-3 border-purple-700">
-        <h2 className="text-3xl font-semibold text-purple-400 flex justify-center items-center gap-3">
-        <FaProjectDiagram className="text-2xl" />Projects</h2>
+    <motion.div
+      initial={{ opacity: 0, y: 40 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="bg-gradient-to-br from-[#0a0a0a] to-[#050505] p-8 md:p-10 rounded-[3.5rem] border border-white/5 shadow-2xl relative group"
+    >
+      <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-indigo-500/5 blur-[120px] rounded-full pointer-events-none opacity-40"></div>
+
+      <header className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8 border-b border-white/5 pb-6 relative z-10">
+        <div className="space-y-1">
+          <p className="text-[10px] font-black uppercase text-indigo-500 tracking-[0.4em]">Your Projects</p>
+          <h2 className="text-3xl md:text-4xl font-black tracking-tighter text-white">
+            Project <span className="text-gray-500 italic font-medium">Catalog</span>
+          </h2>
+        </div>
 
         <button
-          className="flex items-center gap-2 bg-gradient-to-r from-blue-700 to-cyan-600 hover:brightness-125 text-white px-4 py-2 rounded-lg transition-all duration-200"
-          onClick={() => setManageMode((prev) => !prev)}
+          onClick={() => setManageMode(!manageMode)}
+          className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest transition-all ${manageMode
+              ? "bg-indigo-500 text-white hover:bg-indigo-400 shadow-lg shadow-indigo-500/20"
+              : "bg-white/5 text-white hover:bg-white/10 border border-white/10"
+            }`}
         >
-          {manageMode ? (
-            <>
-              <MdDone size={18} />
-              Done
-            </>
-          ) : (
-            <>
-              <AiOutlineEdit size={18} />
-              Manage
-            </>
-          )}
+          {manageMode ? <><HiCheck className="text-lg" /> Done</> : <><HiOutlinePencil className="text-lg" /> Manage</>}
         </button>
+      </header>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
+        <AnimatePresence mode="popLayout">
+          {projectList.map((project) => {
+            const techList = Array.isArray(project.technologies) ? project.technologies : project.technologies?.split(",") || [];
+
+            return (
+              <motion.div
+                layout
+                key={project._id}
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                className="group/proj relative bg-white/[0.02] border border-white/5 rounded-[2rem] overflow-hidden hover:bg-white/[0.04] hover:border-indigo-500/20 transition-all duration-500"
+              >
+                {/* Banner */}
+                <div className="relative aspect-video overflow-hidden">
+                  <img
+                    src={project.projectBanners?.[0]?.url || project.projectBanner?.url}
+                    alt={project.title}
+                    className="w-full h-full object-cover group-hover/proj:scale-105 transition-transform duration-700"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent"></div>
+
+                  {/* Action buttons overlay */}
+                  <div className={`absolute top-3 right-3 flex gap-2 transition-all ${manageMode ? 'opacity-100 scale-100' : 'opacity-0 group-hover/proj:opacity-100 scale-90 group-hover/proj:scale-100'}`}>
+                    <button onClick={() => handleEditModalOpen(project, true)} className="w-9 h-9 rounded-full bg-black/60 backdrop-blur-md border border-white/10 flex items-center justify-center text-white hover:bg-white hover:text-black transition-all">
+                      <HiOutlineEye className="text-sm" />
+                    </button>
+                    {manageMode && (
+                      <button onClick={() => handleEditModalOpen(project, false)} className="w-9 h-9 rounded-full bg-indigo-500 flex items-center justify-center text-white hover:bg-indigo-400 transition-all">
+                        <HiOutlinePencil className="text-sm" />
+                      </button>
+                    )}
+                    {manageMode && (
+                      <button onClick={() => handleDelete(project._id)} className="w-9 h-9 rounded-full bg-red-500 flex items-center justify-center text-white hover:bg-red-400 transition-all">
+                        <HiOutlineTrash className="text-sm" />
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Banner count badge */}
+                  {project.projectBanners && project.projectBanners.length > 1 && (
+                    <div className="absolute bottom-3 right-3 bg-black/60 backdrop-blur-md text-[9px] font-black text-white px-3 py-1 rounded-full border border-white/10 uppercase tracking-widest">
+                      {project.projectBanners.length} images
+                    </div>
+                  )}
+                </div>
+
+                {/* Content */}
+                <div className="p-6 space-y-3">
+                  <h3 className="text-lg font-black text-white tracking-tight">{project.title}</h3>
+                  <p className="text-gray-500 text-xs leading-relaxed line-clamp-2 font-medium">{project.description}</p>
+
+                  {/* Tech chips with icons */}
+                  <div className="flex flex-wrap gap-1.5 pt-1">
+                    {techList.map((tech, i) => {
+                      const icon = getSkillIcon(tech);
+                      return (
+                        <span key={i} className="flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-lg bg-indigo-500/10 text-indigo-400 border border-indigo-500/15">
+                          {icon && <img src={icon} alt={tech.trim()} className="w-3 h-3" />}
+                          {tech.trim()}
+                        </span>
+                      );
+                    })}
+                  </div>
+
+                  {/* Links */}
+                  <div className="flex items-center gap-4 pt-3 border-t border-white/5 mt-2">
+                    {project.gitRepoLink && (
+                      <a href={project.gitRepoLink} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-widest text-gray-400 hover:text-white transition-colors">
+                        <HiOutlineCode className="text-base" /> GitHub
+                      </a>
+                    )}
+                    {project.projectLink && (
+                      <a href={project.projectLink} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-widest text-emerald-500 hover:text-emerald-400 transition-colors">
+                        <HiOutlineExternalLink className="text-base" /> Live demo
+                      </a>
+                    )}
+                  </div>
+                </div>
+              </motion.div>
+            );
+          })}
+        </AnimatePresence>
       </div>
 
-      <div className="p-4 rounded-lg shadow-lg overflow-x-auto">
-      <table className="w-full border-collapse border border-purple-700 text-white text-sm">
-  <thead>
-    <tr className="bg-gray-800 text-left">
-      <th className="p-2 md:p-4 border border-purple-700">Title</th>
-      <th className="p-2 md:p-4 border border-purple-700 max-w-[200px] hidden md:table-cell">Description</th>
-      <th className="p-2 md:p-4 border border-purple-700 max-w-[180px] hidden md:table-cell">Technologies</th>
-      <th className="p-2 md:p-4 border border-purple-700 hidden md:table-cell">Banner</th>
-      <th className="p-2 md:p-4 border border-purple-700">Links</th>
-      <th className="p-2 md:p-4 border border-purple-700">Actions</th>
-    </tr>
-  </thead>
-
-  <tbody>
-    {projectList.map((project) => {
-      if (!project || !project._id) return null;
-      return (
-        <tr key={project._id} className="hover:bg-gray-800 transition-all duration-300">
-          <td className="p-2 md:p-4 border border-purple-700">{project.title}</td>
-
-          <td
-            className="p-2 md:p-4 border border-purple-700 max-w-[200px] truncate hidden md:table-cell"
-            title={project.description}
-          >
-            {project.description}
-          </td>
-
-          <td
-            className="p-2 md:p-4 border border-purple-700 max-w-[180px] truncate hidden md:table-cell"
-            title={
-              Array.isArray(project.technologies)
-                ? project.technologies.join(", ")
-                : project.technologies
-            }
-          >
-            {Array.isArray(project.technologies)
-              ? project.technologies.join(", ")
-              : project.technologies}
-          </td>
-
-          <td className="p-2 border border-purple-700 hidden md:table-cell">
-            <img
-              src={project.projectBanner?.url}
-              alt="Banner"
-              onClick={() => setPreviewImage(project.projectBanner?.url)}
-              className="w-20 h-16 object-cover rounded shadow cursor-pointer hover:scale-105 transition-all duration-300"
-            />
-          </td>
-
-          <td className="p-2 md:p-4 border border-purple-700">
-            <div className="flex flex-col md:flex-row gap-2 md:gap-3">
-              {project.gitRepoLink && (
-                <a
-                  href={project.gitRepoLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-400 hover:underline text-xs md:text-sm"
-                >
-                  GitHub
-                </a>
-              )}
-              {project.projectLink && (
-                <a
-                  href={project.projectLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-green-400 hover:underline text-xs md:text-sm"
-                >
-                  Live
-                </a>
-              )}
-            </div>
-          </td>
-
-          <td className="p-2 md:p-4 flex flex-wrap gap-2 justify-center mt-2">
-            <button
-              className="bg-yellow-600 hover:bg-yellow-700 px-3 py-1.5 rounded-full text-white text-xs hover:scale-105 transition-all duration-300 flex items-center gap-1 shadow"
-              onClick={() => handleEditModalOpen(project, true)}
-            >
-              <FaEye />
-              <span className="hidden md:inline">View</span>
-            </button>
-
-            {manageMode && (
-              <>
-                <button
-                  className="bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded-full text-white text-xs hover:scale-105 transition-all duration-300 flex items-center gap-1 shadow"
-                  onClick={() => handleEditModalOpen(project, false)}
-                >
-                  <FiEdit />
-                  <span className="hidden md:inline">Edit</span>
-                </button>
-
-                <button
-                  className="bg-red-500 hover:bg-red-700 px-3 py-1.5 rounded-full text-white text-xs hover:scale-105 transition-all duration-300 flex items-center gap-1 shadow"
-                  onClick={() => handleDelete(project._id)}
-                >
-                  <AiTwotoneDelete />
-                  <span className="hidden md:inline">Delete</span>
-                </button>
-              </>
-            )}
-          </td>
-        </tr>
-      );
-    })}
-  </tbody>
-</table>
-
-
-
-      </div>
+      {!projectList.length && (
+        <div className="text-center py-16 border-2 border-dashed border-white/5 rounded-[2.5rem]">
+          <HiOutlineCollection className="mx-auto text-5xl text-gray-800 mb-3" />
+          <p className="text-gray-600 font-bold text-sm">No projects added yet</p>
+        </div>
+      )}
 
       {editingProject && (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.5 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.5 }}
-          transition={{ duration: 0.3 }}
-          className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
-        >
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-xl flex justify-center items-center z-[100] p-6">
           <ProjectEditModal
             isOpen={!!editingProject}
             editData={editingProject}
             setEditData={setEditingProject}
             onClose={handleEditModalClose}
             onSave={handleSave}
-            readOnly={isViewOnly} 
+            readOnly={isViewOnly}
           />
-        </motion.div>
+        </div>
       )}
-    </div>
+    </motion.div>
   );
 };

@@ -327,10 +327,25 @@ exports.toggleTemplateStatus = async (req, res) => {
 
 exports.updateTemplate = async (req, res) => {
     try {
-        const { templateId } = req.body;
-        const updates = req.body;
+        const { templateId, name, description, previewUrl, isActive } = req.body;
 
-        const updatedTemplate = await Template.findByIdAndUpdate(templateId, updates, { new: true });
+        if (!templateId) {
+            return res.status(400).json({ success: false, message: "Template id required." });
+        }
+
+        // ✅ SECURITY: Exclude sensitive billing fields from mass update
+        // These should only be updated via dedicated administrative routes if needed.
+        const updateData = {};
+        if (name !== undefined) updateData.name = name;
+        if (description !== undefined) updateData.description = description;
+        if (previewUrl !== undefined) updateData.previewUrl = previewUrl;
+        if (isActive !== undefined) updateData.isActive = isActive;
+
+        const updatedTemplate = await Template.findByIdAndUpdate(
+            templateId, 
+            updateData, 
+            { new: true }
+        );
 
         if (!updatedTemplate) {
             return res.status(404).json({
@@ -532,7 +547,7 @@ exports.getDeveloperTemplateStats = async (req, res) => {
       .populate({
         path: "requestedTemplate",
         model: "DeveloperTemplateRequest",
-        select: "status", 
+        select: "status createdAt name", 
       })
       .select("requestedTemplate");
 
@@ -551,6 +566,40 @@ exports.getDeveloperTemplateStats = async (req, res) => {
     const pending = templates.filter(t => t.status === "Pending").length;
     const rejected = templates.filter(t => t.status === "Rejected").length;
 
+    // Calculate Month-over-Month Growth for total sumbissions
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+    const previousMonth = currentMonth === 0 ? 11 : currentMonth - 1;
+    const previousYear = currentMonth === 0 ? currentYear - 1 : currentYear;
+
+    let currentMonthCount = 0;
+    let previousMonthCount = 0;
+
+    templates.forEach(template => {
+        const tempDate = new Date(template.createdAt);
+        const tempMonth = tempDate.getMonth();
+        const tempYear = tempDate.getFullYear();
+
+        if (tempYear === currentYear && tempMonth === currentMonth) {
+            currentMonthCount++;
+        } else if (tempYear === previousYear && tempMonth === previousMonth && tempDate.getDate() <= now.getDate()) {
+            previousMonthCount++;
+        }
+    });
+
+    let growthPercentage = 0;
+    if (previousMonthCount === 0) {
+        growthPercentage = currentMonthCount > 0 ? 100 : 0;
+    } else {
+        growthPercentage = ((currentMonthCount - previousMonthCount) / previousMonthCount) * 100;
+    }
+
+    // Get 5 most recent submissions
+    const recentActivity = [...templates]
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+      .slice(0, 5);
+
     res.status(200).json({
       success: true,
       data: {
@@ -558,6 +607,8 @@ exports.getDeveloperTemplateStats = async (req, res) => {
         approved,
         pending,
         rejected,
+        growthPercentage: parseFloat(growthPercentage.toFixed(1)),
+        recentActivity
       },
     });
   } catch (error) {
@@ -683,3 +734,55 @@ exports.getAllRequestedTemplates = async (req, res) => {
 };
 
 
+
+exports.getPurchasedTemplates = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    if (!userId) {
+      return res.status(400).json({
+        success: false,
+        message: "User not logged in.",
+      });
+    }
+
+    // Fetch user and populate purchased templates
+    const user = await User.findById(userId)
+      .populate({
+        path: "purchasedTemplates",
+        select: "name description price previewImage previewUrl CreatedBy",
+        populate: {
+          path: "CreatedBy",
+          select: "firstName lastName email",
+        },
+      })
+      .exec();
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found.",
+      });
+    }
+
+    const purchasedTemplates = user.purchasedTemplates || [];
+    const total = purchasedTemplates.length;
+
+    return res.status(200).json({
+      success: true,
+      message:
+        total > 0
+          ? "Purchased templates fetched successfully."
+          : "No purchased templates found.",
+      total,
+      userId: user._id,
+      templates: purchasedTemplates,
+    });
+  } catch (err) {
+    console.error("❌ Error fetching purchased templates:", err);
+    return res.status(500).json({
+      success: false,
+      message: "Server error while fetching purchased templates.",
+    });
+  }
+};

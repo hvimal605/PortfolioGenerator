@@ -6,12 +6,15 @@ const { addNewProject, deleteProject, upadteProject, getAllProject, getSinglePro
 
 
 
+const validateSchema = require("../middlewares/validationMiddleware")
+const { addProjectSchema, updateProjectSchema } = require("../validators/projectValidator")
+
 const router = express.Router()
 
-router.post('/addProject',auth,isUser,addNewProject)
-router.delete('/deleteProject',auth,isUser,deleteProject )
-router.put('/updateProject',auth,isUser,upadteProject)
-router.get('/getAllProject',getAllProject)
+router.post('/addProject', auth, isUser, validateSchema(addProjectSchema), addNewProject)
+router.delete('/deleteProject', auth, isUser, deleteProject)
+router.put('/updateProject', auth, isUser, validateSchema(updateProjectSchema), upadteProject)
+router.get('/getAllProject', getAllProject)
 router.post('/getSingleProject',getSingleProject)
 
 module.exports = router

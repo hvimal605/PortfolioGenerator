@@ -4,36 +4,49 @@ const TemplateSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
-    unique: true, 
+    unique: true,
   },
   description: {
     type: String,
-    required: true, 
+    required: true,
   },
   previewUrl: {
-    type: String, 
+    type: String,
     required: true,
   },
-  previewImage:{
-    type: String, 
+  previewImage: {
+    type: String,
     required: true,
-
   },
   CreatedBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
-},
-
-  TemplateLink:{
-    type: String, 
+  },
+  TemplateLink: {
+    type: String,
     required: true,
   },
   usage: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
 
+  // 👇 New fields for Free / Premium classification
+  templateType: {
+    type: String,
+    enum: ["free", "premium"], // restricts to these two only
+    default: "free",
+  },
+
+  // 👇 Optional price field for premium templates
+  price: {
+    type: Number,
+    default: 0, // 0 for free templates
+  },
+
+  // 👇 In case you want to toggle availability
   isActive: {
-    type: Boolean, 
+    type: Boolean,
     default: true,
   },
+
   createdAt: {
     type: Date,
     default: Date.now,

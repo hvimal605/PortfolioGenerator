@@ -1,84 +1,98 @@
 import { motion } from "framer-motion";
-import { FaDownload } from "react-icons/fa";
-import { SlCalender } from "react-icons/sl";
-import { MdDone } from "react-icons/md";
-import { TbInfoCircle } from "react-icons/tb";
-
+import { HiOutlineArrowDownTray, HiOutlineCalendar, HiOutlineCheckCircle, HiOutlineInformationCircle } from "react-icons/hi2";
 import { format } from "date-fns";
 
 export default function TemplateCardDeveloper({ template }) {
   const status = template.status;
+  
   const formattedDate = (date) =>
     date && date !== "Pending" && date !== "Rejected"
-      ? format(new Date(date), "dd MMM yyyy")
-      : date;
+      ? format(new Date(date), "MMM dd, yyyy")
+      : "--";
 
-  const statusColor = {
-    Approved: "text-green-400 bg-green-700/20",
-    Pending: "text-yellow-400 bg-yellow-600/20",
-    Rejected: "text-red-500 bg-red-700/20",
+  const statusConfig = {
+    Approved: {
+       color: "text-emerald-400",
+       bg: "bg-emerald-500/10",
+       border: "border-emerald-500/20",
+       glow: "group-hover:shadow-[0_0_30px_rgba(16,185,129,0.15)] group-hover:border-emerald-500/30"
+    },
+    Pending: {
+       color: "text-amber-400",
+       bg: "bg-amber-500/10",
+       border: "border-amber-500/20",
+       glow: "group-hover:shadow-[0_0_30px_rgba(245,158,11,0.15)] group-hover:border-amber-500/30"
+    },
+    Rejected: {
+       color: "text-rose-400",
+       bg: "bg-rose-500/10",
+       border: "border-rose-500/20",
+       glow: "group-hover:shadow-[0_0_30px_rgba(244,63,94,0.15)] group-hover:border-rose-500/30"
+    },
   };
+
+  const currentStatus = statusConfig[status] || statusConfig.Pending;
 
   return (
     <motion.div
-      className="relative group bg-gradient-to-br from-black/60 via-gray-900/40 to-black/80 border border-pink-700 rounded-2xl overflow-hidden shadow-[0_0_15px_#ec4899] transition-all duration-300 hover:scale-[1.015] w-full max-w-2xl mx-auto"
-      whileHover={{ scale: 1.025 }}
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      whileHover={{ y: -4 }}
+      transition={{ duration: 0.3 }}
+      className={`group relative flex flex-col bg-[#0A0A0A]/60 backdrop-blur-3xl border border-white/5 rounded-[2rem] p-6 transition-all duration-500 overflow-hidden ${currentStatus.glow}`}
     >
-      {/* Shine Gradient Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-t from-white/5 via-transparent to-white/5 pointer-events-none" />
+      {/* Background Status Glow */}
+      <div className={`absolute top-0 right-0 w-32 h-32 ${currentStatus.bg} blur-3xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none`}></div>
 
-      {/* Card Content */}
-      <div className="relative p-5 sm:p-6 md:p-8 text-white space-y-5 z-10">
-        {/* Header */}
-        <div className="flex flex-col gap-1 items-center text-center">
-          <h2 className="text-xl sm:text-2xl font-bold text-white/90 tracking-wide group-hover:text-white transition">
-            {template.name}
-          </h2>
-          <p className="text-sm sm:text-base text-gray-400">{template.description}</p>
+      {/* Header */}
+      <div className="flex justify-between items-start mb-6 z-10">
+        <div className="space-y-1">
+           <h3 className="text-xl font-bold text-white tracking-tight leading-tight group-hover:text-cyan-400 transition-colors">
+              {template.name}
+           </h3>
+           <p className="text-sm text-zinc-500 font-medium line-clamp-2">
+              {template.description}
+           </p>
         </div>
+        
+        {/* Sleek Download Button */}
+        <a
+          href={template.uploadedUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex-shrink-0 w-10 h-10 rounded-full bg-white/5 flex items-center justify-center border border-white/10 text-white/70 hover:text-white hover:bg-cyan-500 hover:border-cyan-400 transition-all duration-300"
+          title="Download Package"
+        >
+          <HiOutlineArrowDownTray className="text-lg" />
+        </a>
+      </div>
 
-        {/* Status & Date Info */}
-        <div className="text-sm sm:text-base space-y-2 text-gray-400">
-          <div className="flex items-center gap-2">
-            <SlCalender />
-            <span className="text-white">Submitted:</span>{" "}
-            {formattedDate(template.createdAt)}
-          </div>
+      <div className="flex-1"></div>
 
-          {template.reviewedAt && (
-            <div className="flex items-center gap-2">
-              <MdDone className="text-green-400" />
-              <span className="text-white">Reviewed:</span>{" "}
-              {formattedDate(template.reviewedAt)}
-            </div>
-          )}
-
-          <div className="flex items-center gap-2 mt-2 font-semibold">
-            <TbInfoCircle />
-            <span>Status:</span>
-            <span
-              className={`px-3 py-1 rounded-full font-semibold text-sm ${statusColor[status]} transition-all duration-300`}
-            >
-              {status}
-            </span>
-          </div>
-        </div>
-
-        {/* Buttons Row */}
-        {/* Buttons Row */}
-        <div className="flex flex-col sm:flex-row justify-center sm:justify-between items-center sm:items-start gap-4 pt-4">
+      {/* Status Footer */}
+      <div className="flex flex-col gap-4 mt-6 z-10">
          
+         <div className="flex items-center justify-between border-t border-white/5 pt-4">
+            <div className="flex flex-col gap-1">
+               <div className="flex items-center gap-2 text-zinc-500">
+                  <HiOutlineCalendar className="text-[14px]" />
+                  <span className="text-[10px] font-bold uppercase tracking-widest">Submitted</span>
+               </div>
+               <span className="text-xs font-semibold text-white/80">{formattedDate(template.createdAt)}</span>
+            </div>
 
-          <a
-            href={template.uploadedUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-white hover:text-pink-500 text-2xl transition duration-300 flex justify-center"
-            title="Download Template"
-          >
-            <FaDownload />
-          </a>
-        </div>
+            <div className="flex flex-col gap-1 items-end">
+               <div className="flex items-center gap-2 text-zinc-500">
+                  <span className="text-[10px] font-bold uppercase tracking-widest">Status</span>
+                  <HiOutlineInformationCircle className="text-[14px]" />
+               </div>
+               <div className={`px-3 py-1 rounded-full ${currentStatus.bg} ${currentStatus.border} border`}>
+                  <span className={`text-[10px] font-black uppercase tracking-wider ${currentStatus.color}`}>
+                     {status}
+                  </span>
+               </div>
+            </div>
+         </div>
 
       </div>
     </motion.div>

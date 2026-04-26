@@ -1,4 +1,4 @@
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import { messgaeEndPoints, portfolioEndpoints, projectEndpoints, skillEndpoints, SoftwareAppEndpoints, TimelineEndpoints } from "../apis";
 import { apiConnector } from "../apiConnector";
 
@@ -55,15 +55,15 @@ export const createTimeline = async (timelineData, token) => {
       throw new Error("Could not add timeline.");
     }
     toast.success("Timeline added!")
-
+    toast.dismiss(toastId);
+    return true;
 
   } catch (error) {
     console.error("CREATE_TIMELINE_API ERROR:", error);
     toast.error(error.response.data.message || "Something went wrong while adding the timeline");
+    toast.dismiss(toastId);
+    return false;
   }
-
-  toast.dismiss(toastId);
-
 };
 
 export const deleteTimeline = async ({ Timelineid, portfolioId, token }) => {
@@ -100,7 +100,7 @@ export const updateTimeline = async ({ timelineId, title, description, from, to,
   try {
     const response = await apiConnector(
       "PUT",
-      UpdateTimeline_API, 
+      UpdateTimeline_API,
       { timelineId, title, description, from, to },
       {
         Authorization: `Bearer ${token}`,
@@ -146,9 +146,58 @@ export const addSkill = async (skillData, token) => {
   } catch (error) {
     console.error("ADD_SKILL_API ERROR:", error);
     toast.error(error.response.data.message || "Something went wrong while adding the skill");
+    toast.dismiss(toastId);
+    return false;
   }
 
   toast.dismiss(toastId);
+  return true;
+};
+
+export const addBulkSkills = async (bulkData, token) => {
+  const toastId = toast.loading("Adding Skills...");
+  try {
+    const response = await apiConnector("POST", skillEndpoints.ADD_BULK_SKILLS, bulkData, {
+      "Content-Type": "multipart/form-data",
+      Authorization: `Bearer ${token}`,
+    });
+
+    if (!response?.data?.success) {
+      throw new Error(response?.data?.message || "Could not add skills.");
+    }
+
+    toast.success(response.data.message || "Skills added successfully!");
+    return true;
+  } catch (error) {
+    console.error("ADD_BULK_SKILLS_API ERROR:", error);
+    toast.error(error.response?.data?.message || "Something went wrong while adding the skills");
+    return false;
+  } finally {
+    toast.dismiss(toastId);
+  }
+};
+
+export const addBulkSoftwareApps = async (bulkData, token) => {
+  const toastId = toast.loading("Adding Software Applications...");
+  try {
+    const response = await apiConnector("POST", SoftwareAppEndpoints.ADD_BULK_SOFTWARE_APPS_API, bulkData, {
+      "Content-Type": "multipart/form-data",
+      Authorization: `Bearer ${token}`,
+    });
+
+    if (!response?.data?.success) {
+      throw new Error(response?.data?.message || "Could not add applications.");
+    }
+
+    toast.success(response.data.message || "Applications added successfully!");
+    return true;
+  } catch (error) {
+    console.error("ADD_BULK_APPS_API ERROR:", error);
+    toast.error(error.response?.data?.message || "Something went wrong while adding the applications");
+    return false;
+  } finally {
+    toast.dismiss(toastId);
+  }
 };
 
 
@@ -237,9 +286,12 @@ export const addSoftwareApplication = async (softwareData, token) => {
   } catch (error) {
     console.error("ADD_SOFTWARE_APP_API ERROR:", error);
     toast.error(error.response.data.message || "Something went wrong while adding the Software app");
+    toast.dismiss(toastId);
+    return false;
   }
 
   toast.dismiss(toastId);
+  return true;
 };
 
 export const deleteSoftwareApp = async ({ softwareId, portfolioId, token }) => {
@@ -322,9 +374,12 @@ export const addProject = async (projectData, token) => {
   } catch (error) {
     console.error("ADD_PROJECT_API ERROR:", error);
     toast.error(error.response.data.message || "Something went wrong while adding the Project");
+    toast.dismiss(toastId);
+    return false;
   }
 
   toast.dismiss(toastId);
+  return true;
 };
 
 

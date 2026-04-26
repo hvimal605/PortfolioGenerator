@@ -16,7 +16,7 @@ exports.addSkill = async (req, res) => {
         const { skillSvg } = req.files;
         const { title, portfolioId } = req.body;
 
-        if (!title ) {
+        if (!title) {
             return res.status(400).json({
                 success: false,
                 message: "Please fill all the details !"
@@ -32,7 +32,7 @@ exports.addSkill = async (req, res) => {
 
         const SkillRes = await skill.create({
             title,
-           
+
             svg: {
                 public_id: image.public_id,
                 url: image.secure_url,
@@ -63,7 +63,7 @@ exports.addSkill = async (req, res) => {
 
 exports.deleteSkill = async (req, res) => {
     try {
-        const { Skillid ,portfolioId } = req.body;
+        const { Skillid, portfolioId } = req.body;
         let skillRes = await skill.findById(Skillid);
         if (!skillRes) {
             return res.status(400).json({
@@ -76,10 +76,10 @@ exports.deleteSkill = async (req, res) => {
         await skillRes.deleteOne();
 
         const portfolio = await Portfolio.findByIdAndUpdate(
-                    portfolioId,
-                    { $pull: { skills: Skillid } },
-                    { new: true }
-                );
+            portfolioId,
+            { $pull: { skills: Skillid } },
+            { new: true }
+        );
 
 
         res.status(200).json({
@@ -109,7 +109,7 @@ exports.updateSkill = async (req, res) => {
             });
         }
 
-        const updateData = {  };
+        const updateData = {};
 
         // Handle image update if provided
         if (req.files && req.files.svg) {
@@ -154,6 +154,91 @@ exports.updateSkill = async (req, res) => {
     }
 };
 
+
+exports.addBulkSkills = async (req, res) => {
+    try {
+        let { skills, portfolioId } = req.body;
+
+        if (typeof skills === "string") {
+            skills = JSON.parse(skills);
+        }
+
+        if (!skills || !Array.isArray(skills) || skills.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Skills are required!"
+            });
+        }
+
+        if (!portfolioId) {
+            return res.status(400).json({
+                success: false,
+                message: "Portfolio ID is required!"
+            });
+        }
+
+        const addedSkills = [];
+
+        for (const skillItem of skills) {
+            let iconUrl = skillItem.iconUrl;
+            let iconFile = null;
+
+            // Check if there's a file uploaded for this skill
+            // Identifying file by title match or if it's the only one
+            if (req.files && req.files[`skillSvg_${skillItem.title}`]) {
+                iconFile = req.files[`skillSvg_${skillItem.title}`];
+            }
+
+            let image;
+            if (iconFile) {
+                image = await uploadImageToCloudinary(
+                    iconFile,
+                    process.env.FOLDER_NAME,
+                    1000,
+                    1000
+                );
+            } else if (iconUrl) {
+                image = await uploadImageToCloudinary(
+                    iconUrl,
+                    process.env.FOLDER_NAME,
+                    1000,
+                    1000
+                );
+            } else {
+                continue; // Skip if no icon provided
+            }
+
+            const SkillRes = await skill.create({
+                title: skillItem.title,
+                svg: {
+                    public_id: image.public_id,
+                    url: image.secure_url,
+                },
+            });
+
+            addedSkills.push(SkillRes._id);
+        }
+
+        const portfolio = await Portfolio.findByIdAndUpdate(
+            portfolioId,
+            { $push: { skills: { $each: addedSkills } } },
+            { new: true }
+        );
+
+        res.status(201).json({
+            success: true,
+            message: `${addedSkills.length} Skills Added!`,
+            portfolio
+        });
+
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            success: false,
+            message: 'Something went wrong while adding bulk skills'
+        });
+    }
+};
 
 exports.getAllSkill = async (req, res) => {
     try {

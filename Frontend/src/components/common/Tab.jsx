@@ -2,22 +2,24 @@ import { motion } from "framer-motion";
 
 export default function Tab({ tabData, field, setField }) {
   return (
-    <div className="flex justify-center mb-6">
-      <div className="relative flex bg-gray-700 rounded-full overflow-hidden w-48 p-1">
+    <div className="w-full">
+      <div className="relative flex bg-white/[0.03] border border-white/[0.08] rounded-xl overflow-hidden w-full p-1 backdrop-blur-xl">
         {/* Animated Indicator */}
         <motion.div
-          className="absolute top-0 bottom-0 left-0 w-1/2 rounded-full bg-cyan-300"
+          className="absolute top-1 bottom-1 left-1 w-[calc(50%-4px)] rounded-lg bg-gradient-to-r from-violet-600 to-fuchsia-500 shadow-lg shadow-violet-500/20"
           initial={false}
           animate={{ x: field === tabData[0].type ? 0 : "100%" }}
-          transition={{ type: "spring", stiffness: 500, damping: 30 }}
+          transition={{ type: "spring", stiffness: 400, damping: 25 }}
         />
+        
         {/* Tab Buttons */}
         {tabData.map((tab) => (
           <button
             key={tab.id}
+            type="button"
             onClick={() => setField(tab.type)}
-            className={`w-1/2 z-10 text-md font-semibold py-2 transition-all duration-200 ${
-              field === tab.type ? "text-black" : "text-gray-300"
+            className={`w-1/2 relative z-10 text-[11px] font-bold uppercase tracking-[0.15em] py-3.5 transition-all duration-300 ${
+              field === tab.type ? "text-white drop-shadow-md" : "text-white/40 hover:text-white/70"
             }`}
           >
             {tab.tabName}

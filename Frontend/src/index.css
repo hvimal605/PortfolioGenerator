@@ -1,1 +1,87 @@
 @import "tailwindcss";
+
+html,
+body,
+#root {
+  background-color: #030712;
+  /* Tailwind zinc-950/slate-950 equivalent */
+  color: white;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .bg-gradient-radial {
+    background-image: radial-gradient(var(--tw-gradient-stops));
+  }
+}
+
+/* 💎 Studio Notification (Sonner overrides) */
+[data-sonner-toast] {
+  background: rgba(10, 10, 10, 0.8) !important;
+  backdrop-filter: blur(40px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 20px !important;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8) !important;
+  color: #fff !important;
+  padding: 16px 24px !important;
+  font-family: inherit !important;
+}
+
+[data-sonner-toast][data-type="success"] {
+  box-shadow: 0 0 30px rgba(52, 211, 153, 0.2) !important;
+  border-color: rgba(52, 211, 153, 0.3) !important;
+}
+
+[data-sonner-toast][data-type="error"] {
+  box-shadow: 0 0 30px rgba(244, 63, 94, 0.2) !important;
+  border-color: rgba(244, 63, 94, 0.3) !important;
+}
+
+[data-sonner-toast][data-type="loading"] {
+  box-shadow: 0 0 30px rgba(34, 211, 238, 0.2) !important;
+  border-color: rgba(34, 211, 238, 0.3) !important;
+}
+
+[data-sonner-toast] svg {
+  transform: scale(1.2) !important;
+  filter: drop-shadow(0 0 5px currentColor) !important;
+}
+
+[data-sonner-toast] [data-close-button] {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: #fff !important;
+}
+
+[data-sonner-toast]::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 40px;
+  height: 40px;
+  background: radial-gradient(circle at center, white, transparent);
+  opacity: 0.03;
+  pointer-events: none;
+}
+/* ?? Global Sexy Animations */
+@keyframes shimmer {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.animate-shimmer {
+  animation: shimmer 5s ease infinite;
+}

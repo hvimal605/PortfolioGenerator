@@ -109,8 +109,8 @@ function VerifyEmail() {
               Back to Signup
             </Link>
             <button className="text-blue-300 flex items-center gap-x-2"
-            
-            onClick={() => dispatch(sendOtp(signupData.email))}>
+
+              onClick={() => dispatch(sendOtp(signupData.email))}>
               <RxCountdownTimer />
               Resend it
             </button>

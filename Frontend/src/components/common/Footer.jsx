@@ -1,71 +1,87 @@
+import React from "react";
 import { FaLinkedin, FaInstagram, FaEnvelope } from "react-icons/fa";
 import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
 
 const Footer = () => {
-    return (
-        <footer className="bg-gradient-to-br from-[#0d0d0d] via-[#121212] to-[#0d0d0d] text-white py-16 px-6 border-t border-gray-800 shadow-[0_-2px_30px_rgba(0,255,180,0.05)] relative overflow-hidden">
-        {/* Background glow layers */}
-        <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top_left,_rgba(0,255,180,0.05),_transparent)] blur-xl" />
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-12 md:gap-8">
-      
-          {/* Logo + Tagline */}
-          <div className="flex flex-col items-center md:items-start text-center md:text-left gap-2">
-            <Link
-              to="/"
-              className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#00B4D8] via-[#90E0EF] to-[#48C9B0] tracking-wide drop-shadow-lg hover:drop-shadow-[0_0_15px_rgba(72,201,176,0.5)] hover:scale-110 transition-transform duration-500"
-            >
-              PortFolio<span className="text-blue-600">Gen</span>
-            </Link>
-            <p className="text-sm text-gray-400 max-w-xs">Craft a stunning portfolio that gets you noticed — in minutes.</p>
-            <p className="text-sm text-blue-400">
-              Support: <a href="mailto:generatorportfolio@gmail.com" className="underline hover:text-blue-300">generatorportfolio@gmail.com</a>
-            </p>
+  return (
+    <footer className="bg-[#030712] text-white py-24 px-6 border-t border-white/5 relative overflow-hidden">
+      {/* 🌌 Background Atmosphere */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[1px] bg-gradient-to-r from-transparent via-indigo-500/50 to-transparent"></div>
+      <div className="absolute bottom-0 right-0 w-96 h-96 bg-indigo-600/5 blur-[140px] rounded-full pointer-events-none"></div>
+
+      <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start gap-16 md:gap-8 relative z-10">
+
+        {/* 🏹 Logo + Simple English Tagline */}
+        <div className="flex flex-col items-center md:items-start text-center md:text-left gap-6 flex-1">
+          <Link to="/" className="group flex flex-col gap-1">
+            <span className="text-3xl font-black tracking-tighter leading-none">
+              Portfolio<span className="bg-gradient-to-r from-indigo-200 via-fuchsia-200 to-emerald-200 bg-clip-text text-transparent italic">Craft</span>
+            </span>
+            <div className="w-12 h-1 bg-indigo-500 rounded-full group-hover:w-full transition-all duration-500"></div>
+          </Link>
+          <p className="text-lg text-white/40 max-w-sm font-medium leading-relaxed">
+            Build your professional website in minutes. The easiest way to get hired.
+          </p>
+          <div className="flex flex-col gap-1">
+            <span className="text-[10px] font-black uppercase tracking-[0.4em] text-white/20">Support Center</span>
+            <a href="mailto:generatorportfolio@gmail.com" className="text-indigo-400 hover:text-white transition-colors font-black tracking-tight underline-offset-4 underline decoration-indigo-500/30">
+              generatorportfolio@gmail.com
+            </a>
           </div>
-      
-          {/* Contact Section */}
-          <div className="text-center md:text-left">
-            <h2 className="text-xl font-bold text-yellow-400 mb-4 tracking-wider">Contact Me</h2>
-            <div className="flex justify-center md:justify-start gap-6 text-2xl">
-              <a
-                href="https://www.linkedin.com/in/harsh-kumar-vimal-5a3a57262"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-white/10 p-3 rounded-full hover:bg-yellow-400 hover:text-black transition-all duration-300 hover:scale-110"
-              >
-                <FaLinkedin />
-              </a>
-              <a
-                href="https://www.instagram.com/hvimal605"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-white/10 p-3 rounded-full hover:bg-pink-500 hover:text-white transition-all duration-300 hover:scale-110"
-              >
-                <FaInstagram />
-              </a>
-              <a
-                href="mailto:generatorportfolio@gmail.com"
-                className="bg-white/10 p-3 rounded-full hover:bg-blue-500 hover:text-white transition-all duration-300 hover:scale-110"
-              >
-                <FaEnvelope />
-              </a>
-            </div>
-          </div>
-      
-          {/* Credits */}
-          <div className="text-center md:text-right text-sm text-gray-400">
-            <p>
-              Created by{" "}
-              <span className="text-yellow-500 font-semibold hover:underline hover:text-yellow-400 transition-colors duration-200">
-                Harsh Kumar Vimal
-              </span>
-            </p>
-            <p className="text-xs mt-1">© {new Date().getFullYear()} All rights reserved.</p>
-          </div>
-      
         </div>
-      </footer>
-      
-    );
+
+        <div className="flex flex-col items-center md:items-start gap-6">
+          <h2 className="text-[11px] font-black text-emerald-400 uppercase tracking-[0.4em]">Connect With Us</h2>
+          <div className="flex gap-4">
+            <a
+              href="https://www.linkedin.com/in/harsh-kumar-vimal-5a3a57262"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-xl hover:bg-indigo-500 hover:border-indigo-400 hover:scale-110 transition-all duration-500"
+            >
+              <FaLinkedin />
+            </a>
+            <a
+              href="https://www.instagram.com/harshkvimal"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-xl hover:bg-fuchsia-500 hover:border-fuchsia-400 hover:scale-110 transition-all duration-500"
+            >
+              <FaInstagram />
+            </a>
+            <a
+              href="mailto:generatorportfolio@gmail.com"
+              className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-xl hover:bg-emerald-500 hover:border-emerald-400 hover:scale-110 transition-all duration-500"
+            >
+              <FaEnvelope />
+            </a>
+          </div>
+        </div>
+
+        {/* 🛡️ Legal & Credits (Simple English) */}
+        <div className="flex flex-col items-center md:items-end gap-10 flex-1 w-full md:w-auto">
+          <div className="flex flex-wrap justify-center md:justify-end gap-x-10 gap-y-4">
+            <Link to="/terms" className="text-[11px] font-black uppercase tracking-widest text-white/40 hover:text-white transition-colors">Terms</Link>
+            <Link to="/privacy" className="text-[11px] font-black uppercase tracking-widest text-white/40 hover:text-white transition-colors">Privacy</Link>
+            <Link to="/refund" className="text-[11px] font-black uppercase tracking-widest text-white/40 hover:text-white transition-colors">Refunds</Link>
+          </div>
+
+          <div className="text-center md:text-right">
+            <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.4em] mb-2">Designed With ❤️ By</p>
+            <span className="text-xl font-black text-white tracking-tighter">Harsh Kumar Vimal</span>
+          </div>
+
+          <div className="flex flex-col items-center md:items-end gap-1 pt-6 border-t border-white/5 w-full">
+            <p className="text-[9px] font-black text-white/10 uppercase tracking-[0.6em]">
+              © {new Date().getFullYear()} PortfolioCraft Studio
+            </p>
+
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
 };
 
 export default Footer;

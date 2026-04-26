@@ -1,113 +1,58 @@
 import { useEffect, useState } from "react";
-import TemplateCard from "../Template/TemplateCard";
+import TemplateCardFortemplates from "../Template/TempalteCardFortemplates";
 import { getAllTemplates } from "../../../services/operations/TemplateApi";
-import Button from "../../common/AnimatedButton";
-
 import { motion } from "framer-motion";
-import { AiOutlineClose } from "react-icons/ai";
 
 export default function TemplateSelection({ onTemplateSelect }) {
-
   const [templates, setTemplates] = useState([]);
-  const [selectedTemplate, setSelectedTemplate] = useState(null);
-  const [modalTemplate, setModalTemplate] = useState(null);
-
+  const [selectedTemplateId, setSelectedTemplateId] = useState(null);
 
   useEffect(() => {
     const fetchTemplates = async () => {
       const result = await getAllTemplates();
-      // console.log("ye hai apne sb templates",result)
-      if (result) {
-        setTemplates(result)
-      }
-    }
-    fetchTemplates()
-  }, [])
-
-
-
+      if (result) setTemplates(result);
+    };
+    fetchTemplates();
+  }, []);
 
   const handleSelect = (template) => {
-    setSelectedTemplate(template);
-    onTemplateSelect(template); // Pass the selected template back to PortfolioCreatePage
+    // When a template is clicked from the card's action button
+    setSelectedTemplateId(template._id);
+    onTemplateSelect(template);
   };
+
   return (
-    <div className="p-4">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="space-y-12">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-10 lg:gap-14 max-w-5xl mx-auto">
         {templates.map((template) => (
-          <div
+          <motion.div
             key={template._id}
-            onClick={() => handleSelect(template)} // Clicking the card selects
-            className={`relative transition-transform duration-300 ease-in-out ${selectedTemplate?._id === template._id
-              ? "border-8 border-green-600 scale-105 shadow-lg"
-              : "border border-transparent"
-              } rounded-xl`}
+            layout
+            className={`relative transition-all duration-500 rounded-[3rem] ${
+              selectedTemplateId === template._id
+                ? "ring-4 ring-indigo-500 shadow-[0_0_60px_rgba(79,70,229,0.4)] scale-[1.02]"
+                : "ring-0"
+            }`}
           >
-            {selectedTemplate?._id === template._id && (
-              <div className="absolute top-2 right-2 bg-green-600 border-green-300 border-2  text-white text-sm font-bold rounded-full w-8 h-8 flex items-center justify-center shadow-md z-10">
-                ✓
-              </div>
+            {selectedTemplateId === template._id && (
+               <motion.div 
+                 initial={{ scale: 0 }}
+                 animate={{ scale: 1 }}
+                 className="absolute -top-3 -right-3 bg-indigo-500 text-white text-lg font-black rounded-full w-12 h-12 flex items-center justify-center shadow-2xl z-[100] border-4 border-[#111111]"
+               >
+                 ✓
+               </motion.div>
             )}
 
-            <TemplateCard
-              template={template}
-              onSelect={handleSelect}
-              onSeeDetails={(template) => setModalTemplate(template)}
-            />
-          </div>
-        ))}
-
-      </div>
-
-      {modalTemplate && (
-        <motion.div
-          className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-        >
-          <motion.div
-            className="bg-gradient-to-br from-gray-800 via-gray-900 to-black border border-white/10 backdrop-blur-xl text-white p-6 rounded-2xl shadow-2xl w-full max-w-lg relative"
-            initial={{ scale: 0.8 }}
-            animate={{ scale: 1 }}
-            transition={{ type: "spring", stiffness: 200 }}
-          >
-        
-
-            <button
-              onClick={() => setModalTemplate(null)}
-              className="absolute top-3 right-4 text-white hover:text-white transition"
-            >
-              <AiOutlineClose className="text-3xl" />
-            </button>
-
-            <h2 className="text-3xl font-bold mb-2">{modalTemplate.name}</h2>
-            <p className="text-sm text-gray-300">{modalTemplate.description}</p>
-            <p className="text-xs text-gray-400 mt-1">
-              Created by:{" "}
-              <span className="font-semibold text-white">
-                {modalTemplate.CreatedBy?.firstName} {modalTemplate.CreatedBy?.lastName}
-              </span>
-            </p>
-            {/* Fixed image size with hover effect */}
-            <div className="mt-4 max-h-64 overflow-hidden rounded-lg">
-              <div className="mt-4 rounded-lg border border-white/10 shadow-lg overflow-hidden">
-                <div className="w-full aspect-video">
-                  <img
-                    src={modalTemplate.previewImage}
-                    alt={modalTemplate.name}
-                    className="w-full h-full object-contain"
-                  />
-                </div>
-              </div>
-
+            <div className="w-full h-full pointer-events-auto">
+               <TemplateCardFortemplates
+                 template={template}
+                 onSelect={handleSelect}
+               />
             </div>
           </motion.div>
-        </motion.div>
-      )}
-
-
-
+        ))}
+      </div>
     </div>
   );
 }

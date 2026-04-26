@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-import { AiOutlineDelete, AiOutlineEdit, AiOutlineCheck } from "react-icons/ai";
-import { FaRegClock } from "react-icons/fa";
+import { HiOutlineTrash, HiOutlinePencilAlt, HiCheck, HiOutlineClock, HiOutlineCalendar, HiPlus } from "react-icons/hi";
 import { deleteTimeline, updateTimeline as updateTimelineAPI } from "../../../../services/operations/PortfolioApi";
 import { useSelector } from "react-redux";
+import { motion, AnimatePresence } from "framer-motion";
 
 export const Timeline = ({ timeline }) => {
   const [isEditMode, setIsEditMode] = useState(false);
@@ -19,12 +19,7 @@ export const Timeline = ({ timeline }) => {
   const handleDelete = async (index, id) => {
     try {
       setLoadingIndex(index);
-      const success = await deleteTimeline({
-        Timelineid: id,
-        portfolioId,
-        token,
-      });
-
+      const success = await deleteTimeline({ Timelineid: id, portfolioId, token });
       if (success) {
         const updatedTimeline = [...localTimeline];
         updatedTimeline.splice(index, 1);
@@ -38,7 +33,7 @@ export const Timeline = ({ timeline }) => {
   };
 
   const handleFieldChange = (index, field, value) => {
-    const updatedTimeline = [...localTimeline];
+    const updatedTimeline = JSON.parse(JSON.stringify(localTimeline));
     if (field === "from" || field === "to") {
       updatedTimeline[index].timeline[field] = value;
     } else {
@@ -50,18 +45,9 @@ export const Timeline = ({ timeline }) => {
   const handleUpdate = async (index, id) => {
     const item = localTimeline[index];
     const { title, description, timeline: { from, to } } = item;
-
     try {
       setLoadingIndex(index);
-      const updated = await updateTimelineAPI({
-        timelineId: id,
-        title,
-        description,
-        from,
-        to,
-        token,
-      });
-
+      const updated = await updateTimelineAPI({ timelineId: id, title, description, from, to, token });
       if (updated) {
         const updatedTimeline = [...localTimeline];
         updatedTimeline[index] = updated;
@@ -75,176 +61,152 @@ export const Timeline = ({ timeline }) => {
   };
 
   return (
-    <div className="mt-6 border border-pink-700 p-4 rounded-2xl bg-black shadow-[0_0_10px_#1f2937]">
-      <div className="flex flex-col sm:flex-row justify-center sm:justify-between items-center border-b border-pink-700 pb-3 gap-3">
-        <h2 className="text-3xl font-bold flex items-center gap-2 text-pink-400">
-          <FaRegClock size={26} className="text-pink-400" />
-          Timeline
-        </h2>
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="mt-12 bg-gradient-to-br from-[#0a0a0a] to-[#050505] p-8 md:p-12 rounded-[3.5rem] border border-white/5 shadow-2xl relative overflow-hidden group"
+    >
+      <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-pink-500/5 blur-[120px] rounded-full pointer-events-none opacity-40"></div>
+
+      <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 border-b border-white/5 pb-8 relative z-10">
+        <div className="space-y-1">
+          <p className="text-[10px] font-black uppercase text-pink-500 tracking-[0.4em]">Experience Timeline</p>
+          <h2 className="text-4xl md:text-5xl font-black tracking-tighter text-white">
+            Your <span className="text-gray-500 italic font-medium">Timeline</span>
+          </h2>
+        </div>
 
         <button
-          className="bg-gradient-to-r from-blue-700 to-cyan-600 hover:brightness-125 text-white px-4 py-2 rounded-lg shadow-md transition-all duration-300 flex items-center gap-2 mt-4 sm:mt-0"
           onClick={() => setIsEditMode(!isEditMode)}
+          className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest transition-all ${
+            isEditMode 
+            ? "bg-pink-500 text-white hover:bg-pink-400 shadow-lg shadow-pink-500/20" 
+            : "bg-white/5 text-white hover:bg-white/10 border border-white/10"
+          }`}
         >
-          {isEditMode ? <AiOutlineCheck size={20} /> : <AiOutlineEdit size={20} />}
-          <span>{isEditMode ? "Done" : "Manage"}</span>
+          {isEditMode ? <><HiCheck className="text-lg" /> Save Changes</> : <><HiOutlinePencilAlt className="text-lg" /> Edit Timeline</>}
         </button>
-      </div>
+      </header>
 
-      {/* Desktop Table */}
-      <div className="hidden sm:block mt-4 overflow-x-auto rounded-xl bg-gray-900 p-2 shadow-inner">
-        <table className="w-full border-collapse text-gray-300 text-sm sm:text-base border border-pink-500">
-          <thead>
-            <tr className="bg-gray-800 text-gray-400">
-              <th className="px-4 py-2 text-left border border-pink-500">Title</th>
-              <th className="px-4 py-2 text-left border border-pink-500">Description</th>
-              <th className="px-4 py-2 text-center border border-pink-500">From</th>
-              <th className="px-4 py-2 text-center border border-pink-500">To</th>
-              {isEditMode && <th className="px-4 py-2 text-center border border-pink-500">Actions</th>}
-            </tr>
-          </thead>
-          <tbody>
-            {localTimeline.map((event, index) => (
-              <tr key={event._id || index} className="border-b border-pink-500 hover:bg-gray-800/50 transition-all">
-                <td className="px-4 py-3 font-medium border border-pink-500">
-                  {isEditMode ? (
-                    <input
-                      type="text"
-                      value={event.title}
-                      onChange={(e) => handleFieldChange(index, "title", e.target.value)}
-                      className="bg-gray-800 text-white border border-gray-600 rounded-md px-2 py-1 w-full"
-                    />
-                  ) : (
-                    event.title
-                  )}
-                </td>
-                <td className="px-4 py-3 border border-pink-500">
-                  {isEditMode ? (
-                    <textarea
-                      value={event.description}
-                      onChange={(e) => handleFieldChange(index, "description", e.target.value)}
-                      className="bg-gray-800 text-white border border-gray-600 rounded-md px-2 py-1 w-full"
-                    />
-                  ) : (
-                    <div className="max-w-xs overflow-x-auto whitespace-nowrap text-gray-400 italic scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent">
-                      {event.description || "—"}
+      <div className="relative z-10 space-y-8">
+        <AnimatePresence>
+          {localTimeline.map((event, index) => (
+            <motion.div
+              layout
+              key={event._id || index}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 20 }}
+              className="flex flex-col md:flex-row gap-6 p-6 rounded-3xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] hover:border-pink-500/20 transition-all group/item"
+            >
+              {/* Date Column */}
+              <div className="md:w-56 shrink-0 flex flex-col justify-center items-center md:items-start border-b md:border-b-0 md:border-r border-white/5 pb-4 md:pb-0 md:pr-6">
+                <div className="flex items-center gap-2 text-[10px] font-black text-pink-500 uppercase tracking-widest mb-2">
+                   <HiOutlineCalendar className="text-sm" /> Date
+                </div>
+                {isEditMode ? (
+                  <div className="space-y-4 w-full pt-1">
+                    <div className="space-y-1 relative">
+                      <label className="text-[9px] text-gray-500 font-bold uppercase tracking-widest pl-1">Start month</label>
+                      <input 
+                        type="month" 
+                        value={event.timeline.from ? String(event.timeline.from).substring(0, 7) : ""} 
+                        onChange={(e) => handleFieldChange(index, "from", e.target.value)} 
+                        className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2.5 text-xs text-white uppercase font-black tracking-wider focus:border-pink-500/50 outline-none transition-all [color-scheme:dark]" 
+                      />
                     </div>
-                  )}
-                </td>
-                <td className="px-4 py-3 text-center border border-pink-500">
-                  {isEditMode ? (
-                    <input
-                      type="date"
-                      value={event.timeline.from}
-                      onChange={(e) => handleFieldChange(index, "from", e.target.value)}
-                      className="bg-gray-800 text-white border border-gray-600 rounded-md px-2 py-1"
-                    />
-                  ) : (
-                    event.timeline.from
-                  )}
-                </td>
-                <td className="px-4 py-3 text-center border border-pink-500">
-                  {isEditMode ? (
-                    <input
-                      type="date"
-                      value={event.timeline.to}
-                      onChange={(e) => handleFieldChange(index, "to", e.target.value)}
-                      className="bg-gray-800 text-white border border-gray-600 rounded-md px-2 py-1"
-                    />
-                  ) : (
-                    event.timeline.to
-                  )}
-                </td>
-                {isEditMode && (
-                  <td className="px-4 py-3 text-center border border-pink-500 space-x-4">
-                    <button
-                      onClick={() => handleUpdate(index, event._id)}
-                      disabled={loadingIndex === index}
-                      className="text-green-400 hover:text-green-600"
-                    >
-                      <AiOutlineCheck size={20} />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(index, event._id)}
-                      disabled={loadingIndex === index}
-                      className="text-pink-500 hover:text-pink-700 disabled:opacity-50"
-                    >
-                      <AiOutlineDelete size={20} />
-                    </button>
-                  </td>
+                    
+                    <div className="space-y-1 relative">
+                      <div className="flex items-center justify-between pb-1">
+                        <label className="text-[9px] text-gray-500 font-bold uppercase tracking-widest pl-1">End month</label>
+                        <label className="flex items-center gap-1.5 cursor-pointer group">
+                          <div className="relative flex items-center justify-center">
+                            <input
+                              type="checkbox"
+                              checked={String(event.timeline.to).toLowerCase() === "present"}
+                              onChange={(e) => handleFieldChange(index, "to", e.target.checked ? "Present" : "")}
+                              className="appearance-none w-3.5 h-3.5 rounded-[3px] border border-white/20 bg-white/5 checked:bg-pink-500 checked:border-pink-500 transition-all outline-none cursor-pointer peer"
+                            />
+                            <svg className="absolute w-2.5 h-2.5 text-white opacity-0 peer-checked:opacity-100 pointer-events-none" viewBox="0 0 14 10" fill="none">
+                               <path d="M1 5L4.5 8.5L13 1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                          </div>
+                          <span className="text-[9px] font-black text-pink-500/70 group-hover:text-pink-500 transition-colors uppercase tracking-wider">Currently here</span>
+                        </label>
+                      </div>
+                      
+                      <input 
+                        type={String(event.timeline.to).toLowerCase() === "present" ? "text" : "month"} 
+                        value={String(event.timeline.to).toLowerCase() === "present" ? "Present" : (event.timeline.to ? String(event.timeline.to).substring(0, 7) : "")} 
+                        onChange={(e) => handleFieldChange(index, "to", e.target.value)} 
+                        disabled={String(event.timeline.to).toLowerCase() === "present"}
+                        className={`w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2.5 text-xs uppercase font-black tracking-wider focus:border-pink-500/50 outline-none transition-all [color-scheme:dark] ${String(event.timeline.to).toLowerCase() === "present" ? "text-pink-500/50 cursor-not-allowed opacity-60" : "text-white"}`} 
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center md:text-left">
+                    <p className="text-xl font-black text-white tracking-widest">{new Date(event.timeline.from).getFullYear()}</p>
+                    <p className="text-[10px] font-bold text-gray-500 uppercase italic">to {(!event.timeline.to || String(event.timeline.to).toLowerCase() === "present") ? "Present" : new Date(event.timeline.to).getFullYear()}</p>
+                  </div>
                 )}
-              </tr>
-            ))}
-          </tbody>
-        </table>
+              </div>
+
+              {/* Content Column */}
+              <div className="flex-1 space-y-3">
+                {isEditMode ? (
+                  <input
+                    type="text"
+                    value={event.title}
+                    onChange={(e) => handleFieldChange(index, "title", e.target.value)}
+                    className="w-full bg-transparent text-2xl font-black text-white outline-none border-b border-pink-500/30 pb-1"
+                  />
+                ) : (
+                  <h3 className="text-2xl font-black text-white tracking-tight group-hover/item:text-pink-400 transition-colors">{event.title}</h3>
+                )}
+
+                {isEditMode ? (
+                  <textarea
+                    value={event.description}
+                    onChange={(e) => handleFieldChange(index, "description", e.target.value)}
+                    className="w-full bg-black/20 border border-white/5 p-4 rounded-2xl text-gray-400 text-sm leading-relaxed outline-none focus:border-pink-500/30 resize-none"
+                    rows={3}
+                  />
+                ) : (
+                  <p className="text-gray-500 leading-relaxed font-medium italic opacity-80 break-words line-clamp-3">"{event.description}"</p>
+                )}
+              </div>
+
+              {/* Action Column */}
+              {isEditMode && (
+                <div className="md:w-16 flex md:flex-col justify-center items-center gap-4 border-t md:border-t-0 md:border-l border-white/5 pt-4 md:pt-0 md:pl-6 shrink-0">
+                  <button
+                    onClick={() => handleUpdate(index, event._id)}
+                    disabled={loadingIndex === index}
+                    className="w-10 h-10 rounded-xl bg-green-500/10 text-green-500 flex items-center justify-center hover:bg-green-500 hover:text-black transition-all"
+                  >
+                    <HiCheck className="text-xl" />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(index, event._id)}
+                    disabled={loadingIndex === index}
+                    className="w-10 h-10 rounded-xl bg-red-500/10 text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all shadow-lg"
+                  >
+                    <HiOutlineTrash className="text-xl" />
+                  </button>
+                </div>
+              )}
+            </motion.div>
+          ))}
+        </AnimatePresence>
       </div>
 
-      {/* Mobile Card View (Edit not added for mobile for now) */}
-      <div className="sm:hidden mt-4 flex flex-col gap-4">
-  {localTimeline.map((event, index) => (
-    <div key={event._id || index} className="bg-gray-900 p-4 rounded-xl shadow-md border border-gray-800">
-      {isEditMode ? (
-        <>
-          <input
-            type="text"
-            value={event.title}
-            onChange={(e) => handleFieldChange(index, "title", e.target.value)}
-            className="bg-gray-800 text-white border border-gray-600 rounded-md px-2 py-1 w-full mb-2"
-            placeholder="Title"
-          />
-          <textarea
-            value={event.description}
-            onChange={(e) => handleFieldChange(index, "description", e.target.value)}
-            className="bg-gray-800 text-white border border-gray-600 rounded-md px-2 py-1 w-full mb-2"
-            placeholder="Description"
-          />
-          <div className="flex justify-between gap-2 mb-2">
-            <input
-              type="date"
-              value={event.timeline.from}
-              onChange={(e) => handleFieldChange(index, "from", e.target.value)}
-              className="bg-gray-800 text-white border border-gray-600 rounded-md px-2 py-1 w-full"
-            />
-            <input
-              type="date"
-              value={event.timeline.to}
-              onChange={(e) => handleFieldChange(index, "to", e.target.value)}
-              className="bg-gray-800 text-white border border-gray-600 rounded-md px-2 py-1 w-full"
-            />
-          </div>
-          <div className="flex justify-end gap-5">
-            <button
-              onClick={() => handleUpdate(index, event._id)}
-              disabled={loadingIndex === index}
-              className="text-green-400 hover:text-green-600"
-            >
-              <AiOutlineCheck size={20} />
-            </button>
-            <button
-              onClick={() => handleDelete(index, event._id)}
-              disabled={loadingIndex === index}
-              className="text-red-500 hover:text-red-700"
-            >
-              <AiOutlineDelete size={20} />
-            </button>
-          </div>
-        </>
-      ) : (
-        <>
-          <h3 className="text-lg font-semibold text-white">{event.title}</h3>
-          <p className="text-gray-400 text-sm mt-1 italic whitespace-pre-line">
-            {event.description || "No description"}
-          </p>
-          <div className="flex justify-between text-sm text-gray-300 mt-2">
-            <span>From: {event.timeline.from}</span>
-            <span>To: {event.timeline.to}</span>
-          </div>
-        </>
+      {!localTimeline.length && (
+        <div className="text-center py-20 border-2 border-dashed border-white/5 rounded-[3rem]">
+          <HiOutlineClock className="mx-auto text-6xl text-gray-800 mb-4" />
+          <p className="text-gray-600 font-black uppercase tracking-widest text-xs">No experience added yet</p>
+        </div>
       )}
-    </div>
-  ))}
-</div>
-
-    </div>
+    </motion.div>
   );
 };

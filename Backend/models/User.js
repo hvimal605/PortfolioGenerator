@@ -2,16 +2,18 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 
 const UserSchema = new mongoose.Schema({
-    firstName: {
-        type: String,
-        required: true,
-        trim: true,
-    },
-    lastName: {
-        type: String,
-        required: true,
-        trim: true,
-    },
+	firstName: {
+		type: String,
+		required: true,
+		trim: true,
+		index: true,
+	},
+	lastName: {
+		type: String,
+		required: true,
+		trim: true,
+		index: true,
+	},
     email: {
         type: String,
         required: true,
@@ -39,6 +41,13 @@ const UserSchema = new mongoose.Schema({
         ref: "Portfolio",
 
     }],
+     // 💸 For premium templates / payments later
+    purchasedTemplates: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Template",
+      },
+    ],
     deployLink: {
         type: String,
 
@@ -65,6 +74,11 @@ const UserSchema = new mongoose.Schema({
 
     token: {
         type: String,
+        index: true,
+    },
+    resetPasswordToken: {
+        type: String,
+        index: true,
     },
     resetPasswordExpires: {
         type: Date,
@@ -77,6 +91,14 @@ const UserSchema = new mongoose.Schema({
         type: Date,
         default: Date.now,
     },
+    aiResumeUsageCount: {
+        type: Number,
+        default: 0
+    },
+    aiResumeUsageResetTime: {
+        type: Date,
+        default: null
+    }
 });
 
 

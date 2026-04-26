@@ -1,6 +1,6 @@
-import toast from "react-hot-toast"
+import { toast } from "sonner";
 import { settingsEndpoints } from "../apis"
-import { setUser } from "../../slices/profileSlice"
+import { setUser } from "../../slices/profileSlice";
 import { apiConnector } from "../apiConnector"
 import { logout } from "./authApi"
 
@@ -13,7 +13,8 @@ const {
     UPDATE_PROFILE_API,
     CHANGE_PASSWORD_API,
     DELETE_PROFILE_API,
-    UPDATE_DISPLAY_PICTURE_API
+    UPDATE_DISPLAY_PICTURE_API,
+    GET_USER_DETAILS_API
     
   } = settingsEndpoints
 
@@ -120,6 +121,28 @@ export async function changePassword(token, formData) {
         toast.error("Could Not Update Display Picture")
       }
       toast.dismiss(toastId)
+    }
+  }
+
+  export function getUserDetails(token, navigate) {
+    return async (dispatch) => {
+      try {
+        const response = await apiConnector("GET", GET_USER_DETAILS_API, null, {
+          Authorization: `Bearer ${token}`,
+        })
+        console.log("GET_USER_DETAILS_API API RESPONSE............", response)
+  
+        if (!response.data.success) {
+          throw new Error(response.data.message)
+        }
+        const userImage = response.data.data.image
+          ? response.data.data.image
+          : `https://api.dicebear.com/5.x/initials/svg?seed=${response.data.data.firstName} ${response.data.data.lastName}`
+        dispatch(setUser({ ...response.data.data, image: userImage }))
+      } catch (error) {
+        dispatch(logout(navigate))
+        console.log("GET_USER_DETAILS_API API ERROR............", error)
+      }
     }
   }
   

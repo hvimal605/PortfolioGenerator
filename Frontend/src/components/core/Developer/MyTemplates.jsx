@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import TemplateCardDeveloper from '../Template/TemplateCardDeveloper';
 import { useSelector } from 'react-redux';
 import { getDeveloperTemplates } from '../../../services/operations/TemplateApi';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const MyTemplates = () => {
   const [templates, setTemplates] = useState([]);
@@ -11,7 +12,6 @@ const MyTemplates = () => {
 
   const { token } = useSelector((state) => state.auth);
 
-  // Fetch templates on mount
   useEffect(() => {
     const fetchTemplates = async () => {
       try {
@@ -28,7 +28,6 @@ const MyTemplates = () => {
     fetchTemplates();
   }, [token]);
 
-  // Filter templates based on status
   useEffect(() => {
     if (selectedStatus === 'All') {
       setFilteredTemplates(templates);
@@ -39,49 +38,77 @@ const MyTemplates = () => {
     }
   }, [selectedStatus, templates]);
 
+  const filters = ['All', 'Approved', 'Pending', 'Rejected'];
+
   return (
-    <div className=" text-white p-6 flex flex-col items-center">
-      <h2
-  className="text-3xl font-bold mb-6 bg-gradient-to-r from-indigo-400 to-purple-500 bg-clip-text text-transparent"
->
-  My Templates
-</h2>
+    <div className="w-full space-y-10 pb-20">
+      
+      {/* Page Header */}
+      <div className="flex flex-col gap-1">
+        <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-white">
+          Template <span className="text-white/40">Library</span>
+        </h1>
+        <p className="text-zinc-500 font-medium text-sm">
+          Manage your uploaded templates and track their review status.
+        </p>
+      </div>
 
+      {/* Sexy Horizontal Filter Pills */}
+      <div className="flex items-center gap-3 overflow-x-auto pb-4 [&::-webkit-scrollbar]:hidden w-full">
+         {filters.map((filter) => (
+            <button
+               key={filter}
+               onClick={() => setSelectedStatus(filter)}
+               className={`relative px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-widest transition-all duration-300 flex-shrink-0 ${
+                  selectedStatus === filter 
+                  ? 'text-black bg-white shadow-[0_0_20px_rgba(255,255,255,0.3)]' 
+                  : 'text-zinc-500 bg-white/5 border border-white/10 hover:text-white hover:bg-white/10'
+               }`}
+            >
+               {filter}
+               {selectedStatus === filter && (
+                  <motion.div 
+                     layoutId="filter-pill"
+                     className="absolute inset-0 border border-cyan-400 rounded-full scale-105 opacity-50"
+                     transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                  />
+               )}
+            </button>
+         ))}
+      </div>
 
-      {/* Filter Dropdown */}
-      <div className="relative w-72 mb-8">
-  <select
-    value={selectedStatus}
-    onChange={(e) => setSelectedStatus(e.target.value)}
-    className="w-full appearance-none bg-black/40 backdrop-blur-md text-white px-6 py-4 pr-10 rounded-xl border border-pink-600 shadow-[0_0_20px_#ec489955] hover:shadow-[0_0_25px_#ec4899aa] focus:outline-none focus:ring-2 focus:ring-pink-500 transition-all duration-300 text-base font-semibold tracking-wide"
-    size="1"
-  >
-    <option value="All" className="py-3 text-base text-black">🌐 All Templates</option>
-    <option value="Approved" className="py-3 text-base  text-black">✅ Approved</option>
-    <option value="Pending" className="py-3 text-base  text-black">🕒 Pending</option>
-    <option value="Rejected" className="py-3 text-base  text-black">❌ Rejected</option>
-  </select>
-
-  {/* Custom Arrow */}
-  <div className="pointer-events-none absolute top-4 right-5 text-pink-400 text-lg">
-    ▼
-  </div>
-</div>
-
-
-      {/* Templates Grid */}
+      {/* Templates Grid Container */}
       {loading ? (
-        <p className="text-gray-300 text-lg animate-pulse">Loading your templates...</p>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-4 p-2 w-full">
-          {filteredTemplates.length > 0 ? (
-            filteredTemplates.map(template => (
-              <TemplateCardDeveloper key={template._id} template={template} />
-            ))
-          ) : (
-            <p className="text-gray-400 col-span-3 text-center">No templates found.</p>
-          )}
+        <div className="flex flex-col items-center justify-center py-20 gap-4">
+           <div className="w-8 h-8 rounded-full border-t-2 border-r-2 border-cyan-500 animate-spin"></div>
+           <p className="text-zinc-500 text-xs font-bold uppercase tracking-widest">Syncing Library...</p>
         </div>
+      ) : (
+        <motion.div 
+           layout
+           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+        >
+          <AnimatePresence mode="popLayout">
+            {filteredTemplates.length > 0 ? (
+              filteredTemplates.map(template => (
+                <TemplateCardDeveloper key={template._id} template={template} />
+              ))
+            ) : (
+              <motion.div 
+                 initial={{ opacity: 0 }}
+                 animate={{ opacity: 1 }}
+                 exit={{ opacity: 0 }}
+                 className="col-span-full py-20 flex flex-col items-center justify-center border border-dashed border-white/10 rounded-[2.5rem] bg-[#0A0A0A]/40"
+              >
+                 <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4">
+                    <span className="text-2xl opacity-40">📁</span>
+                 </div>
+                 <p className="text-white/40 font-semibold text-lg tracking-tight">No templates found</p>
+                 <p className="text-zinc-600 text-sm mt-1">Try selecting a different filter above.</p>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </motion.div>
       )}
     </div>
   );

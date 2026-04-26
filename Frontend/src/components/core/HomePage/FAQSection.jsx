@@ -1,81 +1,116 @@
-import React from "react";
-import { motion } from "framer-motion";
-import { IoIosArrowDown } from "react-icons/io";
+import React, { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { HiOutlinePlus, HiOutlineMinus } from "react-icons/hi2";
 
 const faqs = [
   {
-    question: "How do I create my portfolio?",
-    answer:
-      "First, sign up on our platform. Then click on 'Start Building', select your favorite template, and add your details like skills, projects, timeline and software apps. Once you're done, your dashboard will appear with a 'Deploy' button. Just click it, and your portfolio will be live within seconds!",
+    question: "How do I build my portfolio?",
+    answer: "It's easy! First, sign up. Then click 'Start Building', pick a design you like, and add your details. Once you are ready, click 'Deploy' and your site will be live instantly."
   },
   {
-    question: "Can I edit and manage my portfolio after deploying it?",
-    answer:
-      "Yes, absolutely! After deploying, you can easily manage and update your portfolio anytime. Just go to your dashboard by clicking on your profile picture in the navbar. From there, you can edit your portfolio details, add new details, view messages from visitors, and check insights—all in one place.",
+    question: "Can I change my info later?",
+    answer: "Yes! You can update your skills, projects, and details anytime from your dashboard. Your live site will update immediately."
   },
   {
-    question: "I'm a developer. Can I submit my own templates?",
-    answer:
-      "Yes! We welcome developers to submit custom templates. Once reviewed and approved, your template will be available for all users—and you can track how many people are using it from your dashboard.",
-  }
-  ,
-  {
-    question: "Who should use this platform?",
-    answer:
-      "This platform is perfect for students, developers, designers, freelancers, or anyone looking to showcase their work and skills with a stunning portfolio website.",
+    question: "Can I add my own design?",
+    answer: "Yes, we love that! If you are a developer, you can upload your own templates for others to use and see how many people like them."
   },
   {
-    question: "Is this platform free to use?",
-    answer:
-      "Yes! You can create and deploy your portfolio for free. Premium features like exclusive designer templates and advanced analytics will be available in our upcoming Pro plan.",
-  }
-
+  question: "Are all templates free?",
+  answer: "We offer both free and premium templates. You can start with free options and upgrade anytime to unlock advanced designs and features."
+}
 ];
 
-const FAQSection = () => {
+const FAQItem = ({ faq, isOpen, toggle }) => {
   return (
-    <section className="py-24 bg-black text-white relative overflow-hidden">
-  <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-cyan-800/20 via-black to-black blur-3xl opacity-60" />
-
-  <div className="container mx-auto px-6 md:px-12 max-w-5xl">
-    {/* Heading */}
-    <motion.h2
-      initial={{ opacity: 0, y: -30 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.7 }}
-      className="text-5xl font-extrabold text-center mb-16 text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-green-300 to-lime-400"
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      className={`relative group rounded-[2rem] border transition-all duration-500 overflow-hidden ${
+        isOpen ? 'bg-white/10 border-indigo-500/50 shadow-[0_0_50px_rgba(99,102,241,0.1)]' : 'bg-white/5 border-white/10 hover:border-white/20'
+      }`}
     >
-      Frequently Asked Questions
-    </motion.h2>
+      <button 
+        onClick={toggle}
+        className="w-full p-8 flex items-center justify-between text-left group"
+      >
+        <span className={`text-xl font-black transition-colors duration-300 ${isOpen ? 'text-white' : 'text-white/60 group-hover:text-white'}`}>
+          {faq.question}
+        </span>
+        <div className={`w-10 h-10 rounded-full flex items-center justify-center border transition-all duration-500 ${
+          isOpen ? 'bg-indigo-500 border-indigo-400 rotate-0' : 'bg-white/5 border-white/10 rotate-90'
+        }`}>
+          {isOpen ? <HiOutlineMinus className="text-white" /> : <HiOutlinePlus className="text-white/40" />}
+        </div>
+      </button>
 
-    {/* FAQ Items */}
-    <div className="space-y-7">
-      {faqs.map((faq, index) => (
-        <motion.div
-          key={index}
-          initial={{ opacity: 0, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: index * 0.15 }}
-          viewport={{ once: true }}
-          className="relative bg-gradient-to-br from-gray-900/70 to-gray-800/80 backdrop-blur-lg border border-cyan-500/20 rounded-2xl shadow-[0_0_40px_-10px_rgba(0,255,180,0.3)] hover:shadow-[0_0_50px_5px_rgba(0,255,180,0.25)] transition-shadow duration-500 group overflow-hidden"
-        >
-          <details className="group p-6 md:p-8 cursor-pointer transition-all">
-            <summary className="flex items-center justify-between text-xl font-semibold text-cyan-300 hover:text-lime-400 transition-colors duration-300">
-              <span>{faq.question}</span>
-              <IoIosArrowDown className="w-6 h-6 transform transition-transform duration-300 group-open:rotate-180 group-hover:text-lime-400" />
-            </summary>
-            <div className="mt-4 text-gray-300 text-lg leading-relaxed">
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <div className="px-8 pb-8 text-lg font-medium text-white/40 leading-relaxed border-t border-white/5 pt-6">
               {faq.answer}
             </div>
-          </details>
-          {/* Glow Effect */}
-          <div className="absolute inset-0 -z-10 bg-gradient-to-br from-cyan-400/10 to-lime-300/10 opacity-0 group-hover:opacity-100 rounded-2xl blur-md transition duration-500" />
-        </motion.div>
-      ))}
-    </div>
-  </div>
-</section>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  );
+};
 
+const FAQSection = () => {
+  const [openIndex, setOpenIndex] = useState(0);
+
+  return (
+    <section className="py-32 bg-[#030712] text-white relative overflow-hidden">
+      {/* 🌌 Background Glows */}
+      <div className="absolute top-1/2 left-0 w-96 h-96 bg-indigo-600/10 blur-[140px] rounded-full pointer-events-none"></div>
+      <div className="absolute bottom-0 right-0 w-96 h-96 bg-emerald-600/10 blur-[140px] rounded-full pointer-events-none"></div>
+
+      <div className="container mx-auto px-6 max-w-4xl relative z-10">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-center mb-24"
+        >
+          <span className="text-[11px] font-black uppercase tracking-[0.6em] text-emerald-400 mb-6 block">Common Questions</span>
+          <h2 className="text-5xl md:text-6xl font-black text-white tracking-tighter leading-none mb-8">
+            Everything You <br />
+            <span className="bg-gradient-to-r from-emerald-200 via-indigo-200 to-fuchsia-200 bg-clip-text text-transparent italic">Need To Know</span>
+          </h2>
+          <div className="w-24 h-1.5 bg-gradient-to-r from-emerald-500 to-indigo-500 mx-auto rounded-full"></div>
+        </motion.div>
+
+        <div className="space-y-6">
+          {faqs.map((faq, index) => (
+            <FAQItem 
+              key={index} 
+              faq={faq} 
+              isOpen={openIndex === index} 
+              toggle={() => setOpenIndex(openIndex === index ? -1 : index)} 
+            />
+          ))}
+        </div>
+
+        {/* 🪄 Floating Accent */}
+        <motion.div 
+          animate={{ y: [0, -10, 0] }}
+          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+          className="mt-20 flex justify-center opacity-20"
+        >
+           <div className="flex flex-col items-center gap-4">
+              <div className="w-[1px] h-20 bg-gradient-to-b from-[#030712] to-white/40"></div>
+              <span className="text-[9px] font-black uppercase tracking-[0.8em]">Start Your Journey</span>
+           </div>
+        </motion.div>
+      </div>
+    </section>
   );
 };
 

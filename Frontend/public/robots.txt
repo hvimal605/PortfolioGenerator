@@ -1,0 +1,12 @@
+User-agent: *
+# Crawl allow karein sirf important pages
+Allow: /$
+Allow: /templates
+Allow: /portfolioCreate
+
+# Crawl na karein (irrelevant pages)
+Disallow: /login
+Disallow: /signup
+
+# Sitemap ka location
+Sitemap: https://portfolioshub.in/sitemap.xml
