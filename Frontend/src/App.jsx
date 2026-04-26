@@ -1,5 +1,5 @@
 import React from 'react'
-import { Route, Routes } from 'react-router-dom'
+import { Route, Routes, useLocation } from 'react-router-dom'
 import Home from './Pages/Home'
 import Signup from './Pages/Signup'
 import { GoogleLogin, GoogleOAuthProvider } from '@react-oauth/google';
@@ -40,7 +40,9 @@ import Pricing from './Pages/Pricing.jsx';
 
 
 const App = () => {
-  const { user } = useSelector((state) => state.profile)
+  const { user } = useSelector((state) => state.profile);
+  const location = useLocation();
+  const isCreationPage = location.pathname === '/PortfolioCreate/UploadDetails';
 
   return (
 

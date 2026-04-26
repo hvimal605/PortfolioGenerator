@@ -1,10 +1,11 @@
 import { motion, useMotionValue, useTransform, useSpring } from "framer-motion";
 import { FaArrowCircleRight } from "react-icons/fa";
+import { HiOutlineInformationCircle } from "react-icons/hi2";
 import AnimatedButton2 from "../../common/AnimatedButton2";
 import { createPortal } from "react-dom";
 import { useState, useEffect } from "react";
 
-export default function TemplateCardFree({ template, onSelect }) {
+export default function TemplateCardFree({ template, onSelect, onPreview }) {
   const [showModal, setShowModal] = useState(false);
   const [iframeLoading, setIframeLoading] = useState(true);
 
@@ -145,16 +146,32 @@ export default function TemplateCardFree({ template, onSelect }) {
           </div>
 
           {/* ⚡ High-End Call to Actions */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
-            <div onClick={() => setShowModal(true)} className="flex-1 sm:w-auto">
-              <AnimatedButton2 text="Live Preview" />
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center gap-2 w-full">
+              {onPreview && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onPreview(template);
+                  }}
+                  className="w-[30%] px-1 py-3.5 bg-white/5 border border-white/10 text-white text-[9px] font-black uppercase tracking-[0.1em] rounded-full hover:bg-white/10 transition-all duration-500 overflow-hidden text-ellipsis whitespace-nowrap"
+                >
+                  Details
+                </button>
+              )}
+              <div onClick={(e) => { e.stopPropagation(); setShowModal(true); }} className="w-[70%]">
+                <AnimatedButton2 text="Live Preview" />
+              </div>
             </div>
 
             <button
-              onClick={() => onSelect(template)}
-              className="flex-[1.4] flex items-center justify-center gap-2 px-8 py-4 bg-white text-black text-[10px] font-black uppercase tracking-[0.2em] rounded-full shadow-[0_15px_40px_rgba(255,255,255,0.1)] hover:bg-cyan-400 hover:shadow-[0_0_30px_rgba(34,211,238,0.5)] active:scale-95 transition-all duration-500"
+              onClick={(e) => {
+                e.stopPropagation();
+                onSelect(template);
+              }}
+              className="w-full flex items-center justify-center gap-2 px-8 py-4 bg-white text-black text-[10px] font-black uppercase tracking-[0.2em] rounded-full shadow-[0_15px_40px_rgba(255,255,255,0.1)] hover:bg-cyan-400 hover:shadow-[0_0_30px_rgba(34,211,238,0.5)] active:scale-95 transition-all duration-500"
             >
-              Create Portfolio <FaArrowCircleRight className="text-lg" />
+              Select Template <FaArrowCircleRight className="text-lg" />
             </button>
           </div>
         </div>

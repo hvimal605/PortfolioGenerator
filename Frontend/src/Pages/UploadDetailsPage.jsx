@@ -14,6 +14,15 @@ import ConfirmationModal from '../components/common/ConfirmationModal';
 import { useNavigate } from 'react-router-dom';
 import { logout } from '../services/operations/authApi';
 import { motion, AnimatePresence } from 'framer-motion';
+import {
+  HiOutlineUser,
+  HiOutlineClock,
+  HiOutlineBolt,
+  HiOutlineRectangleGroup,
+  HiOutlineComputerDesktop,
+  HiOutlineRocketLaunch,
+  HiOutlineXMark
+} from "react-icons/hi2";
 
 const StepGlows = ({ step }) => {
   const colors = [
@@ -60,6 +69,26 @@ const UploadDetailsPage = () => {
   };
 
   const steps = ["Personal details", "Timeline", "Skills", "Projects", "Software & tools", "Dashboard"];
+  
+  const stepIcons = [
+    <HiOutlineUser />,
+    <HiOutlineClock />,
+    <HiOutlineBolt />,
+    <HiOutlineRectangleGroup />,
+    <HiOutlineComputerDesktop />,
+    <HiOutlineRocketLaunch />
+  ];
+
+  const stepColors = [
+    "from-amber-400 to-amber-600",
+    "from-rose-400 to-rose-600",
+    "from-emerald-400 to-emerald-600",
+    "from-indigo-400 to-indigo-600",
+    "from-sky-400 to-sky-600",
+    "from-slate-400 to-slate-600"
+  ];
+
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
     if (!token) {
@@ -97,24 +126,117 @@ const UploadDetailsPage = () => {
       
       <div className="relative z-10 flex h-full">
         {/* Sidebar - Desktop Only */}
-        <div className="pt-20">
+        <div className="hidden lg:block pt-0">
           <CreationSidebar steps={steps} currentStep={step} />
         </div>
 
         {/* Main Content Area */}
-        <main className="flex-1 min-h-screen relative lg:ml-96 pt-20">
-           {/* Mobile Header (Simplified) */}
-           <div className="lg:hidden p-5 border-b border-white/5 bg-black/60 backdrop-blur-xl sticky top-0 z-40 flex items-center justify-between">
-               <h1 className="text-lg font-bold text-white">PortfolioCraft</h1>
-               <div className="flex items-center gap-3">
-                  <span className="text-xs font-medium text-gray-400">Step {step + 1} of {steps.length}</span>
-                  <div className="w-14 h-1.5 bg-white/10 rounded-full overflow-hidden">
-                     <div className="h-full bg-indigo-500 rounded-full transition-all" style={{ width: `${((step + 1) / steps.length) * 100}%` }}></div>
-                  </div>
-               </div>
-            </div>
+        <main className="flex-1 min-h-screen relative lg:ml-96">
+           {/* 🚀 Mobile/Tablet Step Info Bar - Fixed below MainNavbar */}
+           <div className="lg:hidden fixed top-20 left-0 z-40 w-full px-6 py-4 flex items-center justify-between bg-[#0a0a0a]/80 backdrop-blur-3xl border-b border-white/5">
+              <div className="flex flex-col">
+                 <span className="text-[9px] font-black text-indigo-400 uppercase tracking-[0.3em] mb-0.5">Step {step + 1} of {steps.length}</span>
+                 <h2 className="text-[13px] font-black text-white uppercase tracking-tighter">{steps[step]}</h2>
+              </div>
 
-           <div className="p-4 md:p-12 lg:p-20 max-w-6xl mx-auto">
+              <div className="flex items-center gap-6">
+                 <div className="flex flex-col items-end">
+                    <span className="text-[10px] font-black text-white italic">{Math.round(((step + 1) / steps.length) * 100)}%</span>
+                    <div className="w-16 h-1.5 bg-white/5 rounded-full overflow-hidden mt-1 border border-white/5">
+                       <div className="h-full bg-white transition-all duration-700 shadow-[0_0_10px_rgba(255,255,255,0.3)]" style={{ width: `${((step + 1) / steps.length) * 100}%` }}></div>
+                    </div>
+                 </div>
+
+                 <button 
+                   onClick={() => setIsMenuOpen(true)}
+                   className="w-10 h-10 shrink-0 flex items-center justify-center bg-white/5 rounded-full border border-white/10 text-white active:scale-90 transition-all shadow-lg"
+                 >
+                   <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                     <path d="M2.25 13.5H15.75M2.25 9H15.75M2.25 4.5H15.75" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                   </svg>
+                 </button>
+              </div>
+           </div>
+
+           {/* Mobile Steps Drawer (Hamburger content) */}
+           <AnimatePresence>
+             {isMenuOpen && (
+               <>
+                 <motion.div 
+                   initial={{ opacity: 0 }}
+                   animate={{ opacity: 1 }}
+                   exit={{ opacity: 0 }}
+                   onClick={() => setIsMenuOpen(false)}
+                   className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[1001] lg:hidden"
+                 />
+                 <motion.div 
+                   initial={{ x: "100%" }}
+                   animate={{ x: 0 }}
+                   exit={{ x: "100%" }}
+                   transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                   className="fixed top-0 right-0 h-full w-[80%] max-w-xs bg-[#0a0a0a] border-l border-white/10 z-[1002] p-8 lg:hidden"
+                 >
+                    <div className="flex items-center justify-between mb-12">
+                      <div className="flex flex-col">
+                        <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40">Creation Progress</span>
+                        <h3 className="text-xl font-black text-white uppercase tracking-tighter mt-1">Section Details</h3>
+                      </div>
+                      <button onClick={() => setIsMenuOpen(false)} className="w-12 h-12 flex items-center justify-center bg-white/5 rounded-full text-white border border-white/10 shadow-xl">
+                        <HiOutlineXMark size={24} />
+                      </button>
+                    </div>
+
+                    <div className="space-y-3">
+                      {steps.map((s, index) => {
+                        const isActive = step === index;
+                        const isCompleted = index < step;
+                        
+                        return (
+                          <button
+                            key={index}
+                            onClick={() => {
+                              dispatch(setStep(index));
+                              setIsMenuOpen(false);
+                            }}
+                            className={`w-full group relative flex items-center gap-5 px-5 py-5 rounded-[1.5rem] transition-all duration-500 text-left border ${
+                              isActive
+                                ? "bg-white/[0.05] border-white/20 shadow-2xl"
+                                : "bg-white/[0.02] border-transparent hover:bg-white/5 hover:border-white/10"
+                            }`}
+                          >
+                            {/* Icon matching Laptop */}
+                            <div className={`w-12 h-12 shrink-0 rounded-[1.2rem] flex items-center justify-center text-xl transition-all duration-700 ${
+                              isActive
+                                ? `bg-gradient-to-br ${stepColors[index]} text-black shadow-lg shadow-black/50`
+                                : isCompleted
+                                  ? "bg-white/10 text-white"
+                                  : "bg-white/[0.03] text-gray-700"
+                            }`}>
+                              {stepIcons[index]}
+                            </div>
+
+                            <div className="flex flex-col">
+                              <span className={`text-[10px] font-black uppercase tracking-widest mb-0.5 ${
+                                isActive ? "text-indigo-400" : "text-white/20"
+                              }`}>Step 0{index + 1}</span>
+                              <span className={`text-[11px] font-black uppercase tracking-[0.1em] ${
+                                isActive ? "text-white" : "text-white/40 group-hover:text-white/70"
+                              }`}>{s}</span>
+                            </div>
+
+                            {isCompleted && (
+                              <div className="absolute right-6 w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.5)]" />
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                 </motion.div>
+               </>
+             )}
+           </AnimatePresence>
+
+           <div className="p-4 md:p-12 lg:p-20 pt-40 lg:pt-20 max-w-6xl mx-auto">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={step}
@@ -144,14 +266,16 @@ const UploadDetailsPage = () => {
               </AnimatePresence>
            </div>
 
-           {/* Quick Navigation Footer (Mobile Only) */}
-           <div className="lg:hidden fixed bottom-6 left-1/2 -translate-x-1/2 flex items-center bg-black/60 backdrop-blur-3xl border border-white/5 p-2 rounded-[2rem] shadow-2xl z-40">
+           {/* Quick Navigation Footer (Floating Tablet & Mobile Only) */}
+           <div className="lg:hidden fixed bottom-8 left-1/2 -translate-x-1/2 flex items-center bg-[#0a0a0a]/80 backdrop-blur-3xl border border-white/10 p-2 px-3 rounded-full shadow-[0_20px_50px_rgba(0,0,0,0.5)] z-[60]">
               {steps.map((_, i) => (
                 <button 
                   key={i} 
                   onClick={() => dispatch(setStep(i))}
-                   className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold transition-all ${
-                     step === i ? "bg-white text-black scale-110 shadow-xl" : "text-gray-500 hover:text-white"
+                   className={`w-11 h-11 rounded-full flex items-center justify-center text-[11px] font-black transition-all duration-500 ${
+                     step === i 
+                     ? "bg-white text-black scale-110 shadow-2xl" 
+                     : "text-white/30 hover:text-white"
                   }`}
                 >
                   {i + 1}

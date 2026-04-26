@@ -168,14 +168,32 @@ const SkillForm = () => {
     setCustomSkills(customSkills.filter((_, i) => i !== index));
   };
 
+  const validateIcons = async (skills) => {
+    const checkIcon = (url) => {
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => resolve(true);
+        img.onerror = () => resolve(false);
+        img.src = url;
+      });
+    };
+
+    for (const skill of skills) {
+      if (skill.iconUrl) {
+        const isValid = await checkIcon(skill.iconUrl);
+        if (!isValid) {
+          return skill.title;
+        }
+      }
+    }
+    return null;
+  };
+
   const onSubmit = async () => {
     if (selectedSkills.length === 0 && customSkills.length === 0) {
       toast.error("Add at least one skill");
       return;
     }
-
-    const formData = new FormData();
-    formData.append("portfolioId", portfolioId);
 
     const skillsArray = [];
     selectedSkills.forEach((skill) => {
@@ -187,6 +205,32 @@ const SkillForm = () => {
         skillsArray.push({ title: skill.title, iconUrl: skill.iconUrl });
       } else {
         skillsArray.push({ title: skill.title });
+      }
+    });
+
+    // 🚀 High-Fidelity Validation: Check if icons actually exist on the CDN
+    toast.loading("Verifying tech icons...", { id: "icon-val" });
+    const failingSkill = await validateIcons(skillsArray);
+    toast.dismiss("icon-val");
+
+    if (failingSkill) {
+      toast.error(
+        <div className="flex flex-col gap-1">
+          <span className="font-black text-xs uppercase tracking-widest text-red-400">System Error</span>
+          <span className="text-[13px] font-bold text-white">Your skill <span className="text-red-500">"{failingSkill}"</span> does not have a valid icon in our library.</span>
+          <span className="text-[11px] text-gray-400">Please remove it or add it using a custom icon upload.</span>
+        </div>,
+        { duration: 6000 }
+      );
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("portfolioId", portfolioId);
+
+    // Re-append files for custom skills that are NOT suggested
+    customSkills.forEach((skill) => {
+      if (!skill.isSuggested) {
         formData.append(`skillSvg_${skill.title}`, skill.iconFile);
       }
     });
@@ -263,7 +307,9 @@ const SkillForm = () => {
                       onClick={() => handleSelectSkill(skill)}
                       className="flex items-center gap-3 px-6 py-3 bg-white/[0.02] border border-white/5 rounded-2xl transition-all group"
                     >
-                      <img src={skill.iconUrl} alt={skill.title} className="w-6 h-6 grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-500" />
+                      <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center p-1.5 shadow-xl transition-transform group-hover:scale-110">
+                        <img src={skill.iconUrl} alt={skill.title} className="w-full h-full object-contain grayscale group-hover:grayscale-0 transition-all duration-500" />
+                      </div>
                       <span className="text-sm font-semibold tracking-wide text-gray-400 group-hover:text-white">{skill.title}</span>
                       <HiPlus className="text-emerald-500 opacity-0 group-hover:opacity-100 transition-all text-xl" />
                     </motion.button>
@@ -384,11 +430,13 @@ const SkillForm = () => {
                   exit={{ scale: 0.8, opacity: 0 }}
                   className="relative group w-32 h-32 bg-white/[0.02] border border-white/5 rounded-[2.5rem] flex flex-col items-center justify-center gap-3 hover:border-emerald-500/30 transition-all shadow-2xl shadow-black"
                 >
-                  <img src={skill.iconUrl} alt={skill.title} className="w-10 h-10 group-hover:scale-110 transition-transform duration-500" />
+                  <div className="w-16 h-16 rounded-2xl bg-white flex items-center justify-center p-3 shadow-2xl shadow-black/50 group-hover:scale-110 transition-transform duration-500">
+                    <img src={skill.iconUrl} alt={skill.title} className="w-full h-full object-contain" />
+                  </div>
                   <span className="text-xs font-semibold text-gray-400 tracking-wide text-center px-4">{skill.title}</span>
                   <button
                     onClick={() => handleRemoveSkill(skill.title)}
-                    className="absolute -top-2 -right-2 w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all shadow-xl hover:scale-110"
+                    className="absolute -top-2 -right-2 w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center lg:opacity-0 lg:group-hover:opacity-100 transition-all shadow-xl hover:scale-110 z-20"
                   >
                     <HiOutlineXMark className="text-lg" />
                   </button>
@@ -404,12 +452,14 @@ const SkillForm = () => {
                   exit={{ scale: 0.8, opacity: 0 }}
                   className="relative group w-32 h-32 bg-emerald-500/[0.02] border border-emerald-500/10 rounded-[2.5rem] flex flex-col items-center justify-center gap-3 hover:border-emerald-500/40 transition-all shadow-2xl shadow-black"
                 >
-                  <img src={skill.isSuggested ? skill.iconUrl : skill.iconPreview} alt={skill.title} className="w-10 h-10 object-contain group-hover:scale-110 transition-transform duration-500" />
+                  <div className="w-16 h-16 rounded-2xl bg-white flex items-center justify-center p-3 shadow-2xl shadow-black/50 group-hover:scale-110 transition-transform duration-500">
+                    <img src={skill.isSuggested ? skill.iconUrl : skill.iconPreview} alt={skill.title} className="w-full h-full object-contain" />
+                  </div>
                   <span className="text-xs font-semibold text-emerald-500/70 tracking-wide text-center px-4">{skill.title}</span>
                   <div className="absolute -bottom-2 bg-emerald-500 text-[9px] font-bold capitalize text-black px-3 py-1 rounded-full border border-black shadow-lg">Custom</div>
                   <button
                     onClick={() => handleRemoveCustomSkill(index)}
-                    className="absolute -top-2 -right-2 w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all shadow-xl hover:scale-110"
+                    className="absolute -top-2 -right-2 w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center lg:opacity-0 lg:group-hover:opacity-100 transition-all shadow-xl hover:scale-110 z-20"
                   >
                     <HiOutlineXMark className="text-lg" />
                   </button>

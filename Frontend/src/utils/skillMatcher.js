@@ -154,6 +154,14 @@ const ALIAS_MAP = {
 
   // Machine Learning
   "ml": "machine learning",
+
+  // HTML
+  "html": "html5",
+  "html 5": "html5",
+
+  // CSS
+  "css": "css3",
+  "css 3": "css3",
 };
 
 /**

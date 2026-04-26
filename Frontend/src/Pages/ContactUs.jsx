@@ -125,9 +125,9 @@ export default function ContactUs() {
             <h3 className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-4">Follow Us</h3>
             <div className="flex gap-3">
               <SocialLink href="https://www.linkedin.com/in/harsh-kumar-vimal-5a3a57262" icon={FaLinkedin} label="LinkedIn" />
-              <SocialLink href="https://www.instagram.com/hvimal605" icon={FaInstagram} label="Instagram" />
-              <SocialLink href="#" icon={FaGithub} label="GitHub" />
-              <SocialLink href="#" icon={FaTwitter} label="Twitter" />
+              <SocialLink href="https://www.instagram.com/harshkvimal" icon={FaInstagram} label="Instagram" />
+              <SocialLink href="https://github.com/hvimal605/" icon={FaGithub} label="GitHub" />
+              
             </div>
           </div>
         </div>

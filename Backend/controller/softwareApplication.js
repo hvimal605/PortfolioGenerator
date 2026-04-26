@@ -8,36 +8,45 @@ const cloudinary = require("cloudinary")
 
 exports.addNewApplication = async (req, res) => {
     try {
-        if (!req.files || !req.files.applicationSvg) {
+        const { name, portfolioId, iconUrl } = req.body;
+        const applicationSvg = req.files?.applicationSvg;
+
+        if (!name || !portfolioId) {
             return res.status(400).json({
                 success: false,
-                message: "SVG is required!"
+                message: "Application name and Portfolio ID are required!"
             });
         }
 
-        const { applicationSvg } = req.files;
-        const { name, portfolioId } = req.body;
-
-        if (!name) {
+        if (!applicationSvg && !iconUrl) {
             return res.status(400).json({
                 success: false,
-                message: "Name is required!"
+                message: "Please provide an icon file or a direct URL!"
             });
         }
 
-        const image = await uploadImageToCloudinary(
-            applicationSvg,
-            process.env.FOLDER_NAME,
-            1000,
-            1000
-        );
+        let svgData = {};
+        if (applicationSvg) {
+            const image = await uploadImageToCloudinary(
+                applicationSvg,
+                process.env.FOLDER_NAME,
+                1000,
+                1000
+            );
+            svgData = {
+                public_id: image.public_id,
+                url: image.secure_url,
+            };
+        } else if (iconUrl) {
+            svgData = {
+                public_id: `cdn_${name}_${Date.now()}`,
+                url: iconUrl,
+            };
+        }
 
         const softwareApplicationRes = await softwareApplication.create({
             name,
-            svg: {
-                public_id: image.public_id,
-                url: image.secure_url,
-            },
+            svg: svgData
         });
 
         const portfolio = await Portfolio.findByIdAndUpdate(
@@ -117,6 +126,7 @@ exports.addBulkSoftwareApps = async (req, res) => {
             
             const fileKey = `appSvg_${app.name}`;
             if (req.files && req.files[fileKey]) {
+                // Priority 1: User uploaded a file (Needs Cloudinary)
                 const image = await uploadImageToCloudinary(
                     req.files[fileKey],
                     process.env.FOLDER_NAME,
@@ -129,24 +139,11 @@ exports.addBulkSoftwareApps = async (req, res) => {
                 };
             } 
             else if (app.iconUrl) {
-                try {
-                    const image = await uploadImageToCloudinary(
-                        app.iconUrl,
-                        process.env.FOLDER_NAME,
-                        1000,
-                        1000
-                    );
-                    svgData = {
-                        public_id: image.public_id,
-                        url: image.secure_url
-                    };
-                } catch (uploadErr) {
-                    console.warn(`Icon upload failed for ${app.name}, using direct URL:`, uploadErr.message);
-                    svgData = {
-                        public_id: `direct_${app.name}`,
-                        url: app.iconUrl
-                    };
-                }
+                // Priority 2: Remote CDN Link (Store directly in DB, no Cloudinary needed)
+                svgData = {
+                    public_id: `cdn_${app.name}_${Date.now()}`,
+                    url: app.iconUrl
+                };
             } else {
                 continue;
             }

@@ -155,14 +155,32 @@ const SoftwareApplicationForm = () => {
     setCustomApps(customApps.filter((_, i) => i !== index));
   };
 
+  const validateIcons = async (apps) => {
+    const checkIcon = (url) => {
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => resolve(true);
+        img.onerror = () => resolve(false);
+        img.src = url;
+      });
+    };
+
+    for (const app of apps) {
+      if (app.iconUrl) {
+        const isValid = await checkIcon(app.iconUrl);
+        if (!isValid) {
+          return app.name;
+        }
+      }
+    }
+    return null;
+  };
+
   const onSubmit = async () => {
     if (selectedApps.length === 0 && customApps.length === 0) {
       toast.error("Deploy at least one application node");
       return;
     }
-
-    const formData = new FormData();
-    formData.append("portfolioId", portfolioId);
 
     const appsArray = [];
     selectedApps.forEach((app) => {
@@ -173,6 +191,32 @@ const SoftwareApplicationForm = () => {
         appsArray.push({ name: app.name, iconUrl: app.iconUrl });
       } else {
         appsArray.push({ name: app.name });
+      }
+    });
+
+    // 🚀 Intelligence Check: Verify if icons are reachable
+    toast.loading("Verifying application icons...", { id: "app-val" });
+    const failingApp = await validateIcons(appsArray);
+    toast.dismiss("app-val");
+
+    if (failingApp) {
+      toast.error(
+        <div className="flex flex-col gap-1">
+          <span className="font-black text-xs uppercase tracking-widest text-red-400">Registry Error</span>
+          <span className="text-[13px] font-bold text-white">The tool <span className="text-red-500">"{failingApp}"</span> does not have a valid icon in the registry.</span>
+          <span className="text-[11px] text-gray-400">Please remove it or add it using a custom icon upload.</span>
+        </div>,
+        { duration: 6000 }
+      );
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("portfolioId", portfolioId);
+
+    // Append files for non-suggested custom apps
+    customApps.forEach((app) => {
+      if (!app.isSuggested) {
         formData.append(`appSvg_${app.name}`, app.iconFile);
       }
     });
@@ -252,7 +296,9 @@ const SoftwareApplicationForm = () => {
                     className="flex flex-col items-center justify-center gap-3 p-6 bg-white/[0.02] border border-white/5 rounded-[2rem] transition-all group relative overflow-hidden"
                   >
                     <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    <img src={app.iconUrl} alt={app.name} className="w-8 h-8 grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-500 relative z-10" />
+                    <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center p-2 shadow-xl transition-transform group-hover:scale-110 relative z-10">
+                      <img src={app.iconUrl} alt={app.name} className="w-full h-full object-contain grayscale group-hover:grayscale-0 transition-all duration-500" />
+                    </div>
                     <span className="text-[11px] font-bold tracking-widest capitalize text-gray-500 group-hover:text-white relative z-10">{app.name}</span>
                     <div className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-all transform translate-y-2 group-hover:translate-y-0">
                       <HiPlus className="text-blue-500 text-lg" />
@@ -362,11 +408,13 @@ const SoftwareApplicationForm = () => {
                   exit={{ scale: 0.8, opacity: 0 }}
                   className="relative group w-32 h-32 bg-white/[0.02] border border-white/5 rounded-[2.5rem] flex flex-col items-center justify-center gap-3 hover:border-blue-500/30 transition-all shadow-2xl shadow-black"
                 >
-                  <img src={app.iconUrl} alt={app.name} className="w-10 h-10 group-hover:scale-110 transition-transform duration-500" />
+                  <div className="w-16 h-16 rounded-2xl bg-white flex items-center justify-center p-3 shadow-2xl shadow-black/50 group-hover:scale-110 transition-transform duration-500">
+                    <img src={app.iconUrl} alt={app.name} className="w-full h-full object-contain" />
+                  </div>
                   <span className="text-xs font-semibold text-gray-400 tracking-wide text-center px-4">{app.name}</span>
                   <button
                     onClick={() => handleRemoveApp(app.name)}
-                    className="absolute -top-2 -right-2 w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all shadow-xl hover:scale-110"
+                    className="absolute -top-2 -right-2 w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center lg:opacity-0 lg:group-hover:opacity-100 transition-all shadow-xl hover:scale-110 z-20"
                   >
                     <HiOutlineXMark className="text-lg" />
                   </button>
@@ -382,12 +430,14 @@ const SoftwareApplicationForm = () => {
                   exit={{ scale: 0.8, opacity: 0 }}
                   className="relative group w-32 h-32 bg-blue-500/[0.02] border border-blue-500/10 rounded-[2.5rem] flex flex-col items-center justify-center gap-3 hover:border-blue-500/40 transition-all shadow-2xl shadow-black"
                 >
-                  <img src={app.isSuggested ? app.iconUrl : app.iconPreview} alt={app.name} className="w-10 h-10 object-contain group-hover:scale-110 transition-transform duration-500" />
+                  <div className="w-16 h-16 rounded-2xl bg-white flex items-center justify-center p-3 shadow-2xl shadow-black/50 group-hover:scale-110 transition-transform duration-500">
+                    <img src={app.isSuggested ? app.iconUrl : app.iconPreview} alt={app.name} className="w-full h-full object-contain" />
+                  </div>
                   <span className="text-xs font-semibold text-blue-500/70 tracking-wide text-center px-4">{app.name}</span>
                   <div className="absolute -bottom-2 bg-blue-500 text-[8px] font-black capitalize text-white px-3 py-1 rounded-full border border-black shadow-lg">Custom</div>
                   <button
                     onClick={() => handleRemoveCustomApp(index)}
-                    className="absolute -top-2 -right-2 w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all shadow-xl hover:scale-110"
+                    className="absolute -top-2 -right-2 w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center lg:opacity-0 lg:group-hover:opacity-100 transition-all shadow-xl hover:scale-110 z-20"
                   >
                     <HiOutlineXMark className="text-lg" />
                   </button>

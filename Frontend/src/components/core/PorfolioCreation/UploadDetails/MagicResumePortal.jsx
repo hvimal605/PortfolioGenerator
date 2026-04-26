@@ -89,7 +89,7 @@ const MagicResumePortal = () => {
   const onDragLeave = () => setIsDragging(false);
 
   return (
-    <div className="w-full flex justify-center mb-16 px-4">
+    <div className="w-full flex justify-center  px-4">
       <motion.div
         ref={cardRef}
         onMouseMove={handleMouseMove}
@@ -111,7 +111,7 @@ const MagicResumePortal = () => {
         />
 
         {/* The Card Body */}
-        <div className="relative z-10 bg-[#0a0a0a]/80 backdrop-blur-3xl border border-white/10 rounded-[2.5rem] p-10 sm:p-14 overflow-hidden">
+        <div className="relative z-10 bg-[#0a0a0a]/80 backdrop-blur-3xl border border-white/10 rounded-[2rem] sm:rounded-[2.5rem] p-6 sm:p-10 md:p-14 overflow-hidden">
 
           {/* Subtle Industrial Grid Overlay */}
           <div className="absolute inset-0 opacity-5 pointer-events-none bg-[linear-gradient(to_right,#888_1px,transparent_1px),linear-gradient(to_bottom,#888_1px,transparent_1px)] bg-[size:40px_40px]" />
@@ -123,43 +123,47 @@ const MagicResumePortal = () => {
             className="absolute left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent z-20 opacity-30 group-hover:opacity-100 transition-opacity"
           />
 
-          <div className="flex flex-col lg:flex-row items-center justify-between gap-12 relative z-30">
+          <div className="flex flex-col lg:flex-row items-center justify-between gap-8 sm:gap-12 relative z-30 text-center lg:text-left">
 
-            <div className="flex items-center gap-8 w-full lg:w-auto text-center lg:text-left">
-              <div className="w-20 h-20 rounded-2xl bg-cyan-500/10 flex items-center justify-center border border-cyan-500/20 text-cyan-500 relative shrink-0">
+            <div className="flex flex-col sm:flex-row items-center gap-6 sm:gap-8 w-full lg:w-auto">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-cyan-500/10 flex items-center justify-center border border-cyan-500/20 text-cyan-500 relative shrink-0">
                 <div className="absolute inset-0 bg-cyan-500/10 blur-xl animate-pulse rounded-2xl" />
-                <HiOutlineCpuChip className={`text-4xl ${isAnalyzing ? 'animate-spin' : ''}`} />
+                <HiOutlineCpuChip className={`text-3xl sm:text-4xl ${isAnalyzing ? 'animate-spin' : ''}`} />
               </div>
-              <div className="space-y-2">
+              <div className="space-y-3 flex-1">
                 <div className="flex items-center gap-2 justify-center lg:justify-start">
                   <span className="text-[10px] font-black uppercase tracking-[0.4em] text-cyan-500">AI Magic Fill</span>
                   <HiOutlineSparkles className="text-cyan-400 text-xs animate-pulse" />
                 </div>
-                <h3 className="text-3xl sm:text-4xl font-black text-white tracking-tighter leading-none">
+                <h3 className="text-2xl sm:text-4xl font-black text-white tracking-tighter leading-none">
                   FILL YOUR INFO <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-white/40 italic">FAST.</span>
                 </h3>
-                <p className="text-gray-500 text-sm sm:text-base font-medium max-w-sm mb-3">
+                <p className="text-gray-500 text-xs sm:text-base font-medium max-w-sm mx-auto lg:mx-0">
                   {isDragging ? "Drop your file here" : "Just drop your PDF resume here and we'll fill the form for you."}
                 </p>
-                <div className="flex flex-col gap-3 lg:items-start items-center">
-                  <div className="flex items-center gap-2 text-[13px] font-bold text-cyan-300 bg-cyan-500/10 border border-cyan-500/20 px-3 py-1.5 rounded-lg w-fit shadow-[0_0_15px_rgba(6,182,212,0.15)] justify-center lg:justify-start">
-                    <span>You have used {stats.usageCount} / {stats.maxLimit} times</span>
+                
+                <div className="flex flex-col gap-3 items-center lg:items-start mt-4">
+                  <div className="flex flex-col sm:flex-row items-center gap-2 text-[11px] sm:text-[13px] font-bold text-cyan-300 bg-cyan-500/10 border border-cyan-500/20 px-4 py-2 rounded-xl shadow-[0_0_15px_rgba(6,182,212,0.15)]">
+                    <span>{stats.usageCount} / {stats.maxLimit} used</span>
                     {stats.resetTime && (
-                      <span className="text-gray-400 border-l border-cyan-500/30 pl-2 ml-1">
-                        Resets in {Math.max(0, Math.ceil((new Date(stats.resetTime) - new Date()) / (1000 * 60 * 60)))} hours
+                      <span className="hidden sm:block text-gray-600">|</span>
+                    )}
+                    {stats.resetTime && (
+                      <span className="text-gray-400">
+                        Resets in {Math.max(0, Math.ceil((new Date(stats.resetTime) - new Date()) / (1000 * 60 * 60)))}h
                       </span>
                     )}
                   </div>
                   {isLimitReached && (
-                    <p className="text-amber-400/90 text-[13px] font-medium bg-amber-500/10 px-3 py-1.5 rounded-md border border-amber-500/20 max-w-[320px]">
-                      Limit reached! You can now create your portfolio manually below.
+                    <p className="text-amber-400/90 text-[11px] sm:text-[13px] font-medium bg-amber-500/10 px-4 py-2 rounded-xl border border-amber-500/20 max-w-[280px] sm:max-w-[320px]">
+                      Limit reached! Fill manually below.
                     </p>
                   )}
                 </div>
               </div>
             </div>
 
-            <div className="relative w-full lg:w-auto">
+            <div className="relative w-full sm:w-auto mt-4 lg:mt-0">
               <AnimatePresence mode="wait">
                 {isAnalyzing ? (
                   <motion.div
@@ -169,7 +173,7 @@ const MagicResumePortal = () => {
                     exit={{ opacity: 0, scale: 0.9 }}
                     className="flex flex-col items-center gap-4"
                   >
-                    <div className="flex items-center gap-3 px-8 py-5 bg-white/5 border border-white/10 rounded-2xl text-cyan-500">
+                    <div className="flex items-center gap-3 px-8 py-5 bg-white/5 border border-white/10 rounded-2xl text-cyan-500 w-full justify-center">
                       <div className="w-5 h-5 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin" />
                       <span className="font-black text-xs uppercase tracking-widest">Reading...</span>
                     </div>
@@ -180,13 +184,13 @@ const MagicResumePortal = () => {
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.9 }}
-                    className="group/hub"
+                    className="group/hub w-full"
                   >
                     {!isLimitReached && <div className="absolute -inset-4 bg-cyan-500/10 blur-2xl rounded-full opacity-0 group-hover/hub:opacity-100 transition-opacity" />}
-                    <div className={`relative flex items-center gap-4 px-10 py-5 rounded-2xl font-black text-xs uppercase tracking-[0.2em] transition-all shadow-xl shadow-cyan-500/5 ${isLimitReached ? "bg-white/5 text-gray-500" : "bg-white text-black transform active:scale-95 hover:bg-cyan-500 hover:text-white"}`}>
+                    <div className={`relative flex items-center justify-center gap-4 px-8 sm:px-10 py-4 sm:py-5 rounded-2xl font-black text-xs uppercase tracking-[0.2em] transition-all shadow-xl shadow-cyan-500/5 ${isLimitReached ? "bg-white/5 text-gray-500" : "bg-white text-black transform active:scale-95 hover:bg-cyan-500 hover:text-white"}`}>
                       <HiOutlineDocumentArrowUp className="text-xl" />
                       <span>{isLimitReached ? "Limit Reached" : "Choose PDF"}</span>
-                      <HiOutlineCubeTransparent className="text-lg opacity-40 ml-2" />
+                      <HiOutlineCubeTransparent className="text-lg opacity-40 ml-1 hidden sm:block" />
                     </div>
                   </motion.div>
                 )}

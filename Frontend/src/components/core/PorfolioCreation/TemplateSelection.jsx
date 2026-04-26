@@ -48,6 +48,7 @@ export default function TemplateSelection({ onTemplateSelect }) {
                <TemplateCardFortemplates
                  template={template}
                  onSelect={handleSelect}
+                 onPreview={onTemplateSelect ? (t) => onTemplateSelect(t, true) : null}
                />
             </div>
           </motion.div>

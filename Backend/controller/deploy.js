@@ -269,16 +269,23 @@ exports.deployPortfolio = async (req, res) => {
             { new: true }
         );
 
-        // Step 6: Send deployment email
+        // Step 6: Send deployment email (Non-blocking)
         const user = await User.findById(userId);
-        const userName = user.firstName + " " + user.lastName;
-        const userEmail = user.email;
+        const userName = user?.firstName + " " + user?.lastName;
+        const userEmail = user?.email;
 
-        await mailSender(
-            userEmail,
-            `Successfully Deployed the Portfolio`,
-            portfolioDeployedTemplate(userName, netlifySiteUrl)
-        );
+        if (userEmail) {
+            try {
+                await mailSender(
+                    userEmail,
+                    `Successfully Deployed the Portfolio`,
+                    portfolioDeployedTemplate(userName, netlifySiteUrl)
+                );
+            } catch (mailError) {
+                console.error("Non-blocking Mail Error:", mailError.message);
+                // We don't throw here so the user still gets a success response for the deployment
+            }
+        }
 
         // Step 7: Update Template usage
         await Template.findByIdAndUpdate(

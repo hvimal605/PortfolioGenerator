@@ -6,37 +6,45 @@ const cloudinary = require("cloudinary")
 
 exports.addSkill = async (req, res) => {
     try {
-        if (!req.files || !req.files.skillSvg) {
+        const { title, portfolioId, iconUrl } = req.body;
+        const skillSvg = req.files?.skillSvg;
+
+        if (!title || !portfolioId) {
             return res.status(400).json({
                 success: false,
-                message: "SVG is required!"
+                message: "Title and Portfolio ID are required!"
             });
         }
 
-        const { skillSvg } = req.files;
-        const { title, portfolioId } = req.body;
-
-        if (!title) {
+        if (!skillSvg && !iconUrl) {
             return res.status(400).json({
                 success: false,
-                message: "Please fill all the details !"
+                message: "Please provide an icon file or a direct URL!"
             });
         }
 
-        const image = await uploadImageToCloudinary(
-            skillSvg,
-            process.env.FOLDER_NAME,
-            1000,
-            1000
-        );
+        let svgData = {};
+        if (skillSvg) {
+            const image = await uploadImageToCloudinary(
+                skillSvg,
+                process.env.FOLDER_NAME,
+                1000,
+                1000
+            );
+            svgData = {
+                public_id: image.public_id,
+                url: image.secure_url,
+            };
+        } else if (iconUrl) {
+            svgData = {
+                public_id: `cdn_${title}_${Date.now()}`,
+                url: iconUrl,
+            };
+        }
 
         const SkillRes = await skill.create({
             title,
-
-            svg: {
-                public_id: image.public_id,
-                url: image.secure_url,
-            },
+            svg: svgData
         });
 
         const portfolio = await Portfolio.findByIdAndUpdate(
@@ -178,42 +186,40 @@ exports.addBulkSkills = async (req, res) => {
         }
 
         const addedSkills = [];
-
         for (const skillItem of skills) {
             let iconUrl = skillItem.iconUrl;
             let iconFile = null;
 
-            // Check if there's a file uploaded for this skill
-            // Identifying file by title match or if it's the only one
+            // Priority 1: User uploaded a file (Needs Cloudinary)
             if (req.files && req.files[`skillSvg_${skillItem.title}`]) {
                 iconFile = req.files[`skillSvg_${skillItem.title}`];
             }
 
-            let image;
+            let svgData = {};
             if (iconFile) {
-                image = await uploadImageToCloudinary(
+                const image = await uploadImageToCloudinary(
                     iconFile,
                     process.env.FOLDER_NAME,
                     1000,
                     1000
                 );
+                svgData = {
+                    public_id: image.public_id,
+                    url: image.secure_url,
+                };
             } else if (iconUrl) {
-                image = await uploadImageToCloudinary(
-                    iconUrl,
-                    process.env.FOLDER_NAME,
-                    1000,
-                    1000
-                );
+                // Priority 2: Remote CDN Link (Store directly in DB, no Cloudinary needed)
+                svgData = {
+                    public_id: `cdn_${skillItem.title}_${Date.now()}`,
+                    url: iconUrl,
+                };
             } else {
                 continue; // Skip if no icon provided
             }
 
             const SkillRes = await skill.create({
                 title: skillItem.title,
-                svg: {
-                    public_id: image.public_id,
-                    url: image.secure_url,
-                },
+                svg: svgData
             });
 
             addedSkills.push(SkillRes._id);

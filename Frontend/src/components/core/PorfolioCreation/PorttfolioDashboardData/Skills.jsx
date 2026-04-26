@@ -122,7 +122,7 @@ export const Skills = ({ skills }) => {
                 className="group/card relative bg-white/[0.02] border border-white/5 p-6 rounded-[2.5rem] flex flex-col items-center gap-4 hover:bg-white/[0.04] hover:border-emerald-500/30 transition-all duration-500 hover:-translate-y-1 shadow-lg hover:shadow-emerald-500/5"
               >
                 <div className="relative">
-                  <div className="w-20 h-20 bg-black/40 border border-white/10 rounded-3xl flex items-center justify-center p-4 relative z-10 group-hover/card:scale-110 transition-transform duration-500 overflow-hidden">
+                  <div className="w-20 h-20 bg-white rounded-3xl flex items-center justify-center p-4 relative z-10 group-hover/card:scale-110 transition-transform duration-500 shadow-2xl shadow-black/50">
                     {(isEditMode && edited?.previewSvgUrl) || skill.svg?.url ? (
                       <img src={(isEditMode && edited?.previewSvgUrl) || skill.svg.url} alt={skill.title} className="w-full h-full object-contain" />
                     ) : (

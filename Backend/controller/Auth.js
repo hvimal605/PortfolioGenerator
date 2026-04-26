@@ -245,21 +245,14 @@ exports.changePassword = async (req, res) => {
         )
 
         try {
-            const emailResponse = await mailSender(
+            await mailSender(
                 updatedUserDetails.email,
                 "Password for your account has been updated",
                 passwordUpdateTemplate(updatedUserDetails)
             );
-
-            // console.log("Email sent successfully:", emailResponse.response)
         } catch (error) {
-
-            console.error("Error occurred while sending email:", error)
-            return res.status(500).json({
-                success: false,
-                message: "Error occurred while sending email",
-                error: error.message,
-            })
+            console.error("Non-blocking Email Error (Password Update):", error.message);
+            // We don't return 500 here because the password was already successfully updated in the DB
         }
 
         return res

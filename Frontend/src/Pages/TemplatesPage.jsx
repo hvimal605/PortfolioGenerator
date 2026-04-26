@@ -51,6 +51,7 @@ export default function TemplatesPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
+  const [confirmationModal, setConfirmationModal] = useState(null);
   const { token } = useSelector((state) => state.auth);
 
   useEffect(() => {
@@ -66,6 +67,18 @@ export default function TemplatesPage() {
       dispatch(getUserDetails(token, navigate));
     }
   }, [token, dispatch, navigate]);
+
+  // 🔒 Lock background scroll when modal is open
+  useEffect(() => {
+    if (selectedTemplate) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [selectedTemplate]);
 
   const filteredTemplates = templates.filter((template) => {
     const matchesSearch =
@@ -86,6 +99,23 @@ export default function TemplatesPage() {
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
   );
+
+  const handleMarketplaceSelect = (template) => {
+    dispatch(setTemplateId(template._id));
+    
+    if (token) {
+      navigate('/PortfolioCreate/UploadDetails');
+    } else {
+      setConfirmationModal({
+        text1: "Sign in to Continue",
+        text2: "You need an account to save your portfolio progress.",
+        btn1Text: "Log In",
+        btn2Text: "Cancel",
+        btn1Handler: () => navigate("/login"),
+        btn2Handler: () => setConfirmationModal(null),
+      });
+    }
+  };
 
   const handleStartBuilding = () => {
     dispatch(setTemplateId(selectedTemplate._id));
@@ -234,7 +264,8 @@ export default function TemplatesPage() {
                 <motion.div key={template._id} variants={itemVariants}>
                   <TemplateCardFortemplates
                     template={template}
-                    onSelect={setSelectedTemplate}
+                    onSelect={handleMarketplaceSelect}
+                    onPreview={setSelectedTemplate}
                   />
                 </motion.div>
               ))
@@ -285,17 +316,19 @@ export default function TemplatesPage() {
       <AnimatePresence>
         {selectedTemplate && (
           <motion.div
-            className="fixed inset-0 z-[9999] bg-black/90 backdrop-blur-md flex items-center justify-center p-6"
+            className="fixed inset-0 z-[9999] bg-black/90 backdrop-blur-md flex items-start md:items-center justify-center p-4 sm:p-6 overflow-y-auto no-scrollbar"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            onClick={() => setSelectedTemplate(null)}
           >
             <motion.div
-              className="bg-[#0a0a0a] border border-white/10 text-white p-8 rounded-[2rem] shadow-[0_0_100px_rgba(0,0,0,1)] w-full max-w-2xl relative overflow-hidden"
+              className="bg-[#0a0a0a] border border-white/10 text-white p-6 sm:p-8 rounded-[1.5rem] sm:rounded-[2rem] shadow-[0_0_100px_rgba(0,0,0,1)] w-full max-w-2xl relative my-auto overflow-hidden"
               initial={{ scale: 0.9, y: 20 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.9, y: 20 }}
               transition={{ type: "spring", stiffness: 200, damping: 25 }}
+              onClick={(e) => e.stopPropagation()}
             >
               <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/10 blur-[60px] rounded-full pointer-events-none" />
 
@@ -347,6 +380,7 @@ export default function TemplatesPage() {
           </motion.div>
         )}
       </AnimatePresence>
+      {confirmationModal && <ConfirmationModal modalData={confirmationModal} />}
     </div>
   );
 }

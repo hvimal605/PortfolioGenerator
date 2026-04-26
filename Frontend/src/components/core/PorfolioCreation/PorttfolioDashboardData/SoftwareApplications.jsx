@@ -118,7 +118,7 @@ export const SoftwareApplications = ({ software }) => {
                 className="group/tool relative aspect-square bg-white/[0.01] border border-white/[0.05] rounded-[3rem] p-8 flex flex-col items-center justify-center gap-4 hover:bg-white/[0.03] hover:border-blue-500/40 transition-all duration-700 hover:shadow-2xl hover:shadow-blue-500/5"
               >
                 <div className="relative">
-                  <div className="w-24 h-24 bg-black/60 border border-white/10 rounded-[2rem] flex items-center justify-center p-5 relative z-10 group-hover/tool:rotate-6 group-hover/tool:scale-110 transition-all duration-500">
+                  <div className="w-24 h-24 bg-white rounded-[2rem] flex items-center justify-center p-5 relative z-10 group-hover/tool:rotate-6 group-hover/tool:scale-110 transition-all duration-500 shadow-2xl shadow-black/50">
                     {edited?.previewSvgUrl || app.svg?.url ? (
                       <img src={edited?.previewSvgUrl || app.svg.url} alt={app.name} className="w-full h-full object-contain filter drop-shadow-2xl" />
                     ) : (
