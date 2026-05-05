@@ -38,8 +38,19 @@ const Port = process.env.PORT || 4000
 
 database.connect()
 
+// 🌍 CORS Configuration
+app.use(
+    cors({
+        origin: (origin, callback) => {
+            // Mirror the incoming origin to allow all domains
+            callback(null, true);
+        },
+        credentials: true,
+    })
+);
+
 // 🛡️ Global Security Hardening
-app.use(helmet()) // Secure HTTP Headers
+app.use(helmet({ crossOriginResourcePolicy: false })) // Secure HTTP Headers, CORP disabled for API access
 app.use(mongoSanitize()) // Prevent NoSQL Injection
 app.use(xss()) // Prevent XSS Attacks
 app.use(hpp()) // Prevent HTTP Parameter Pollution
@@ -69,28 +80,7 @@ app.use("/api/v1/auth", authLimiter)
 app.use(express.json({ limit: "10kb" })) // Body limit to prevent large JSON attacks
 app.use(cookieParser())
 
-const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(",") || ["http://localhost:5173", "http://localhost:3000"]
-app.use(
-    cors({
-        origin: (origin, callback) => {
-            // Allow requests with no origin (like mobile apps or curl requests)
-            if (!origin) return callback(null, true);
-            
-            // Check if origin is in the explicitly allowed list or ends with .netlify.app
-            const isAllowed = allowedOrigins.indexOf(origin) !== -1 || origin.endsWith(".netlify.app");
-            
-            if (isAllowed) {
-                return callback(null, true);
-            } else {
-                return callback(new Error("The CORS policy for this site does not allow access from the specified Origin."), false);
-            }
-        },
-        credentials: true,
-    })
-)
 
-
-  
 
 
 app.use(express.urlencoded({ extended: true }));
