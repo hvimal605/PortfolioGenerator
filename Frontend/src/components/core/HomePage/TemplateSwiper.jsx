@@ -21,16 +21,19 @@ const TemplateSwiper = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [templates, setTemplates] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [confirmationModal, setConfirmationModal] = useState(null);
   const { token } = useSelector((state) => state.auth);
 
   useEffect(() => {
     const fetchTemplates = async () => {
+      setIsLoading(true);
       const result = await getAllTemplates();
       if (result) {
         setTemplates(result);
       }
+      setIsLoading(false);
     };
     fetchTemplates();
   }, []);
@@ -117,20 +120,39 @@ const TemplateSwiper = () => {
             }}
             className="pb-20 !overflow-visible"
           >
-            {templates.map((template, index) => (
-              <SwiperSlide key={index} className="transition-all duration-500 py-10">
-                <motion.div
-                  whileHover={{ y: -20 }}
-                  className="bg-white/5 border border-white/10 rounded-[2.5rem] p-4 backdrop-blur-3xl shadow-2xl overflow-hidden"
-                >
-                  <TemplateCardFortemplates
-                    template={template}
-                    onSelect={handleMarketplaceSelect}
-                    onPreview={setSelectedTemplate}
-                  />
-                </motion.div>
-              </SwiperSlide>
-            ))}
+            {isLoading ? (
+              // Skeleton loading state
+              Array(3).fill(0).map((_, index) => (
+                <SwiperSlide key={`skeleton-${index}`} className="py-10">
+                  <div className="bg-white/5 border border-white/10 rounded-[2.5rem] p-4 backdrop-blur-3xl shadow-2xl h-[420px] flex flex-col animate-pulse">
+                    <div className="w-full h-[220px] bg-white/10 rounded-[1.5rem] mb-6"></div>
+                    <div className="px-2">
+                      <div className="w-2/3 h-6 bg-white/10 rounded-md mb-3"></div>
+                      <div className="w-1/2 h-4 bg-white/10 rounded-md mb-8"></div>
+                      <div className="flex gap-3">
+                        <div className="w-1/2 h-10 bg-white/10 rounded-full"></div>
+                        <div className="w-1/2 h-10 bg-white/10 rounded-full"></div>
+                      </div>
+                    </div>
+                  </div>
+                </SwiperSlide>
+              ))
+            ) : (
+              templates.map((template, index) => (
+                <SwiperSlide key={index} className="transition-all duration-500 py-10">
+                  <motion.div
+                    whileHover={{ y: -20 }}
+                    className="bg-white/5 border border-white/10 rounded-[2.5rem] p-4 backdrop-blur-3xl shadow-2xl overflow-hidden"
+                  >
+                    <TemplateCardFortemplates
+                      template={template}
+                      onSelect={handleMarketplaceSelect}
+                      onPreview={setSelectedTemplate}
+                    />
+                  </motion.div>
+                </SwiperSlide>
+              ))
+            )}
           </Swiper>
 
           {/* 🏹 Custom Glass Navigation Controls */}

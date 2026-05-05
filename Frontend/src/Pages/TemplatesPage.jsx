@@ -54,12 +54,16 @@ export default function TemplatesPage() {
   const [confirmationModal, setConfirmationModal] = useState(null);
   const { token } = useSelector((state) => state.auth);
 
+  const [isLoading, setIsLoading] = useState(true);
+
   useEffect(() => {
     const fetchTemplates = async () => {
+      setIsLoading(true);
       const result = await getAllTemplates();
       if (result) {
         setTemplates(result);
       }
+      setIsLoading(false);
     };
     fetchTemplates();
 
@@ -259,7 +263,24 @@ export default function TemplatesPage() {
             animate="visible"
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 w-full"
           >
-            {paginatedTemplates.length > 0 ? (
+            {isLoading ? (
+              // Skeleton loading state
+              Array(6).fill(0).map((_, index) => (
+                <motion.div key={`skeleton-${index}`} variants={itemVariants} className="w-full">
+                  <div className="bg-white/5 border border-white/10 rounded-[2.5rem] p-4 backdrop-blur-3xl shadow-2xl h-[420px] flex flex-col animate-pulse">
+                    <div className="w-full h-[220px] bg-white/10 rounded-[1.5rem] mb-6"></div>
+                    <div className="px-2">
+                      <div className="w-2/3 h-6 bg-white/10 rounded-md mb-3"></div>
+                      <div className="w-1/2 h-4 bg-white/10 rounded-md mb-8"></div>
+                      <div className="flex gap-3">
+                        <div className="w-1/2 h-10 bg-white/10 rounded-full"></div>
+                        <div className="w-1/2 h-10 bg-white/10 rounded-full"></div>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              ))
+            ) : paginatedTemplates.length > 0 ? (
               paginatedTemplates.map((template) => (
                 <motion.div key={template._id} variants={itemVariants}>
                   <TemplateCardFortemplates

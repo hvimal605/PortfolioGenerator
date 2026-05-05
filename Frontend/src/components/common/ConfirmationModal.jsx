@@ -1,6 +1,20 @@
+import { useEffect } from "react";
+import { createPortal } from "react-dom";
+
 export default function ConfirmationModal({ modalData }) {
-  return (
-    <div className="fixed inset-0 z-[1000] grid place-items-center overflow-auto bg-opacity-40 backdrop-blur-md">
+  useEffect(() => {
+    if (modalData) {
+      document.body.style.overflow = "hidden";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [modalData]);
+
+  if (!modalData) return null;
+
+  return createPortal(
+    <div className="fixed inset-0 z-[99999] grid place-items-center overflow-auto bg-black/60 backdrop-blur-md">
       <div className="w-11/12 max-w-[420px] rounded-2xl border border-[#2a2a2f] bg-[#121212] p-8 shadow-2xl transition-all duration-500 ease-in-out transform scale-100 hover:scale-105">
         
         <p className="text-3xl font-semibold text-gray-100 text-center animate__animated animate__fadeIn">
@@ -33,6 +47,7 @@ export default function ConfirmationModal({ modalData }) {
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

@@ -103,14 +103,36 @@ const Signup = () => {
   const [accountType, setAccountType] = useState(ACCOUNT_TYPE.USER);
   const [formData, setFormData] = useState({ firstName: "", lastName: "", email: "", password: "", confirmPassword: "" });
   const [error, setError] = useState("");
+  const [formErrors, setFormErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
   const [showconfirmPassword, setConfirmShowPassword] = useState(false);
   const { firstName, lastName, email, password, confirmPassword } = formData;
 
-  const handleOnChange = (e) => { setFormData(prev => ({ ...prev, [e.target.name]: e.target.value })); };
+  const handleOnChange = (e) => { 
+    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value })); 
+    if (formErrors[e.target.name]) {
+      setFormErrors(prev => ({ ...prev, [e.target.name]: "" }));
+    }
+  };
   const handleOnSubmit = (e) => {
     e.preventDefault();
-    if (password !== confirmPassword) { toast.error("Passwords don't match"); return; }
+    let hasError = false;
+    const newErrors = {};
+    if (password.length < 8) {
+      newErrors.password = "Password must be at least 8 characters long";
+      toast.error("Password must be at least 8 characters long");
+      hasError = true;
+    }
+    if (password !== confirmPassword) {
+      newErrors.confirmPassword = "Passwords don't match";
+      if (!hasError) toast.error("Passwords don't match");
+      hasError = true;
+    }
+    if (hasError) {
+      setFormErrors(newErrors);
+      return;
+    }
+    setFormErrors({});
     dispatch(setSignupData({ ...formData, accountType }));
     dispatch(sendOtp(formData.email, navigate));
     setFormData({ firstName: "", lastName: "", email: "", password: "", confirmPassword: "" });
@@ -256,11 +278,12 @@ const Signup = () => {
                 <label className="text-[11px] font-semibold text-white/30 uppercase tracking-[0.15em] ml-1">{f.l}</label>
                 <div className="relative">
                   <input type={f.sp ? "text" : "password"} name={f.n} value={f.v} onChange={handleOnChange} required placeholder="••••••••"
-                    className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-3 pr-12 text-white placeholder:text-white/15 focus:outline-none focus:border-violet-500/30 focus:bg-white/[0.06] focus:ring-2 focus:ring-violet-500/15 transition-all text-sm font-medium" />
+                    className={`w-full bg-white/[0.04] border rounded-xl px-4 py-3 pr-12 text-white placeholder:text-white/15 focus:outline-none transition-all text-sm font-medium ${formErrors[f.n] ? "border-red-500/50 focus:border-red-500/50 focus:ring-2 focus:ring-red-500/20" : "border-white/[0.08] focus:border-violet-500/30 focus:bg-white/[0.06] focus:ring-2 focus:ring-violet-500/15"}`} />
                   <button type="button" className="absolute right-4 top-1/2 -translate-y-1/2 text-white/15 hover:text-white/50 transition-colors" onClick={f.t}>
                     {f.sp ? <FaEyeSlash size={14} /> : <FaEye size={14} />}
                   </button>
                 </div>
+                {formErrors[f.n] && <span className="text-red-400 text-[10px] ml-1">{formErrors[f.n]}</span>}
               </motion.div>
             ))}
 
